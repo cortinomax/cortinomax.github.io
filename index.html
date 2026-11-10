@@ -92,7 +92,22 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .pk-d.edge.red{box-shadow:inset 0 0 0 2px var(--clash)}
 .pk-d i{position:absolute;bottom:4px;left:0;right:0;display:flex;gap:2px;justify-content:center}
 .pk-d i b{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.55}
-.pk-sum{font-size:14px;min-height:42px;display:grid;gap:3px}
+.pk-sum{font-size:14px;min-height:20px}
+.pk-cnt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--warn) 16%,var(--surface));position:sticky;top:-16px;z-index:2}
+.pk-cnt.ok{background:color-mix(in srgb,var(--ok) 18%,var(--surface))}
+.pk-cnt.bad{background:color-mix(in srgb,var(--clash) 18%,var(--surface))}
+.pk-big{font:600 30px/1 var(--f-display)}
+.pk-cnt-r{text-align:right;display:grid;gap:2px}
+.okt{color:var(--ok);font-weight:600}
+.pk-chips{display:flex;flex-wrap:wrap;gap:6px}
+.pk-chip{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 10px;cursor:pointer;text-align:left}
+.pk-chip.on{border-color:var(--clash);box-shadow:inset 0 0 0 1px var(--clash)}
+.pk-d.selp{outline:2px solid var(--ink);outline-offset:-2px}
+.pk-d.pend{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+.leftbig{display:flex;align-items:baseline;gap:8px;padding:10px 14px;border-radius:10px;background:color-mix(in srgb,var(--warn) 14%,var(--surface))}
+.leftbig.ok{background:color-mix(in srgb,var(--ok) 16%,var(--surface))}
+.leftbig.bad{background:color-mix(in srgb,var(--clash) 16%,var(--surface))}
+.leftbig b{font:600 26px/1 var(--f-display)}
 .pk-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 .pk-leg span{display:inline-flex;align-items:center;gap:5px}
 .pk-leg u{display:inline-block;width:14px;height:14px;border-radius:4px;text-decoration:none}
@@ -363,67 +378,82 @@ function fmtDays(list){
 /* ---------- календарь выбора дат (только 2027) ---------- */
 const MFULL=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 let PK=null;
-function openPicker(i){
-  const p=S.draft[i]||{};const y=year();
-  let m=p.s?Number(p.s.slice(5,7))-1:(i>0&&S.draft[i-1]&&S.draft[i-1].e?Number(S.draft[i-1].e.slice(5,7))-1:0);
-  PK={i,m,a:p.s||'',b:p.e||'',isNew:!p.s};
+/* Календарь выбора: сразу все периоды. Нажатие: начало → конец = новый период.
+   Нажатие на уже выбранный период выделяет его, его можно удалить. */
+function openPicker(focusIdx){
+  const list=analyze(S.draft).ok.map(p=>({s:p.s,e:p.e})).sort((x,y)=>x.s<y.s?-1:1);
+  let m=0;
+  const f=focusIdx!=null&&S.draft[focusIdx]&&S.draft[focusIdx].s?S.draft[focusIdx]:list[0];
+  if(f)m=Number(f.s.slice(5,7))-1;
+  PK={m,list,a:'',sel:-1,msg:''};
+  document.body.style.overflow='hidden';
   renderPicker();
 }
 function closePicker(apply){
-  if(!PK)return;const i=PK.i;
-  if(apply&&PK.a){S.draft[i]={s:PK.a,e:PK.b||PK.a};S.dirty=true;S.msg=''}
-  else if(PK.isNew&&!(S.draft[i]&&S.draft[i].s)){S.draft.splice(i,1)}
-  PK=null;document.getElementById('pkroot').innerHTML='';render();
-  const el=document.getElementById('pb'+i);if(el)el.focus();
+  if(!PK)return;
+  if(apply){S.draft=PK.list.slice().sort((x,y)=>x.s<y.s?-1:1);S.dirty=true;S.msg=''}
+  PK=null;document.body.style.overflow='';document.getElementById('pkroot').innerHTML='';render();
 }
 function busyMap(){
   const me=S.me,map={};
   emps().forEach(o=>{if(o.id===me)return;okPeriods(o.id).forEach(p=>{for(let t=toD(p.s);t<=toD(p.e);t+=DAY){const d=fromT(t);(map[d]=map[d]||[]).push(o)}})});
   return map;
 }
+function pkIndexAt(iso){return PK.list.findIndex(p=>iso>=p.s&&iso<=p.e)}
 function renderPicker(){
   const root=document.getElementById('pkroot');
   if(!PK){root.innerHTML='';return}
-  const y=year(),m=PK.m,busy=busyMap();
+  const y=year(),m=PK.m,busy=busyMap(),me=empById(S.me),E=ent(me);
+  const total=PK.list.reduce((t,p)=>t+countDays(p.s,p.e),0),left=E-total,has14=PK.list.some(p=>countDays(p.s,p.e)>=14);
   const first=Date.UTC(y,m,1),nd=(Date.UTC(y,m+1,1)-first)/DAY,off=(new Date(first).getUTCDay()+6)%7;
-  const lo=PK.a,hi=PK.b||PK.a;
   let g=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>'<div class="pk-dow">'+d+'</div>').join('');
   for(let k=0;k<off;k++)g+='<div></div>';
   for(let d=1;d<=nd;d++){
-    const iso=y+'-'+pad(m+1)+'-'+pad(d),wd=(off+d-1)%7;
+    const iso=y+'-'+pad(m+1)+'-'+pad(d),wd=(off+d-1)%7,pi=pkIndexAt(iso);
     const c=['pk-d'];if(wd>=5)c.push('we');if(isRed(iso))c.push('red');
-    if(lo&&iso>=lo&&iso<=hi)c.push('in');if(iso===lo||(PK.b&&iso===PK.b))c.push('edge');
+    if(pi>=0){c.push('in');const p=PK.list[pi];if(iso===p.s||iso===p.e)c.push('edge');if(pi===PK.sel)c.push('selp')}
+    if(iso===PK.a)c.push('edge','pend');
     const n=(busy[iso]||[]).length;
     const tip=(isRed(iso)?'Праздник/нерабочий день. ':'')+(n?'В отпуске: '+busy[iso].map(o=>o.name).join(', '):'');
     g+='<button class="'+c.join(' ')+'" data-pkd="'+iso+'"'+(tip?' title="'+esc(tip)+'"':'')+' aria-label="'+d+' '+MS[m]+(tip?'. '+esc(tip):'')+'">'+d+(n?'<i>'+'<b></b>'.repeat(Math.min(n,3))+'</i>':'')+'</button>';
   }
-  let sum='';
-  if(!PK.a) sum='<span class="muted">Нажмите на дату начала отпуска</span>';
-  else if(!PK.b) sum='<span>Начало: <b>'+fmtR(PK.a,PK.a)+'</b>. Теперь нажмите на дату окончания</span>';
-  else{
-    const days=countDays(PK.a,PK.b),cal=calLen(PK.a,PK.b),reds=redIn(PK.a,PK.b);
-    sum='<span><b>'+fmtR(PK.a,PK.b)+'</b> · '+days+' '+dayWord(days)+' отпуска'+(cal!==days?' (из '+cal+' календарных)':'')+'</span>';
-    if(reds.length)sum+='<span class="redtxt">Праздники в периоде: '+fmtDays(reds)+'</span>';
-    const ov=[];emps().forEach(o=>{if(o.id===S.me)return;okPeriods(o.id).forEach(q=>{const x=inter({s:PK.a,e:PK.b},q);if(x)ov.push(o.name+' ('+fmtR(x.s,x.e)+')')})});
-    if(ov.length)sum+='<span class="muted">Пересечения: '+esc(ov.join(', '))+'</span>';
-  }
-  root.innerHTML='<div class="pkwrap" data-pkclose="1"><div class="pk" role="dialog" aria-modal="true" aria-label="Выбор дат отпуска">'+
+  const cnt='<div class="pk-cnt '+(left===0&&has14?'ok':left<0?'bad':'')+'"><div><div class="pk-big">'+(left>=0?left:'+'+(-left))+'</div><div class="small">'+(left>0?'осталось запланировать':left===0?'все дни запланированы':'дней сверх нормы')+'</div></div>'+
+    '<div class="pk-cnt-r small"><div>Запланировано <b>'+total+'</b> из '+E+'</div><div class="'+(has14?'okt':'redtxt')+'">'+(has14?'✓ есть часть от 14 дней':'нужна часть от 14 дней')+'</div></div></div>';
+  let hint;
+  if(PK.msg)hint='<span class="redtxt">'+esc(PK.msg)+'</span>';
+  else if(PK.a)hint='Начало: <b>'+fmtR(PK.a,PK.a)+'</b>. Нажмите на дату окончания';
+  else if(PK.sel>=0)hint='Выбран период <b>'+fmtR(PK.list[PK.sel].s,PK.list[PK.sel].e)+'</b>';
+  else hint=PK.list.length?'Нажмите на дату начала следующего периода или на период, чтобы убрать его':'Нажмите на дату начала отпуска';
+  const chips=PK.list.map((p,i)=>{const dd=countDays(p.s,p.e),reds=redIn(p.s,p.e);
+    return '<button class="pk-chip'+(i===PK.sel?' on':'')+'" data-pksel="'+i+'"><b>'+fmtR(p.s,p.e)+'</b> · '+dd+' '+dayWord(dd)+(reds.length?' <span class="redtxt">· праздн. '+fmtDays(reds)+'</span>':'')+'</button>'}).join('');
+  root.innerHTML='<div class="pkwrap" data-pkclose="1"><div class="pk" role="dialog" aria-modal="true" aria-label="Выбор дат отпуска">'+cnt+
     '<div class="pk-hd"><button class="pk-nav" data-pkm="-1"'+(m<=0?' disabled':'')+' aria-label="Предыдущий месяц">‹</button><h2>'+MFULL[m]+' '+y+'</h2><button class="pk-nav" data-pkm="1"'+(m>=11?' disabled':'')+' aria-label="Следующий месяц">›</button></div>'+
     '<div class="pk-grid">'+g+'</div>'+
-    '<div class="pk-leg"><span><u style="background:color-mix(in srgb,var(--clash) 24%,var(--surface))"></u>праздник</span><span><u style="background:color-mix(in srgb,var(--muted) 16%,var(--surface))"></u>выходной</span><span><u style="background:var(--accent)"></u>ваш период</span><span>• коллеги в отпуске</span></div>'+
-    '<div class="pk-sum">'+sum+'</div>'+
-    '<div class="row" style="justify-content:flex-end"><button class="btn" data-pkx="cancel">Отмена</button><button class="btn pri" data-pkx="ok"'+(PK.a?'':' disabled')+'>Готово</button></div>'+
+    '<div class="pk-leg"><span><u style="background:color-mix(in srgb,var(--clash) 24%,var(--surface))"></u>праздник</span><span><u style="background:color-mix(in srgb,var(--muted) 16%,var(--surface))"></u>выходной</span><span><u style="background:var(--accent)"></u>ваши периоды</span><span>• коллеги в отпуске</span></div>'+
+    '<div class="pk-sum">'+hint+'</div>'+
+    (chips?'<div class="pk-chips">'+chips+'</div>':'')+
+    (PK.sel>=0?'<div class="row"><button class="btn" data-pkdel="1" style="color:var(--clash)">Удалить период '+fmtR(PK.list[PK.sel].s,PK.list[PK.sel].e)+'</button></div>':'')+
+    '<div class="row" style="justify-content:flex-end"><button class="btn" data-pkx="cancel">Отмена</button><button class="btn pri" data-pkx="ok">Готово</button></div>'+
     '</div></div>';
 }
 document.addEventListener('click',ev=>{
   if(!PK)return;
   const t=ev.target;
-  const d=t.closest('[data-pkd]'),nav=t.closest('[data-pkm]'),x=t.closest('[data-pkx]');
+  const d=t.closest('[data-pkd]'),nav=t.closest('[data-pkm]'),x=t.closest('[data-pkx]'),ch=t.closest('[data-pksel]'),del=t.closest('[data-pkdel]');
+  PK.msg='';
   if(d){const iso=d.dataset.pkd;
-    if(!PK.a||PK.b){PK.a=iso;PK.b=''}
-    else if(iso<PK.a){PK.a=iso}
-    else PK.b=iso;
+    if(PK.a){
+      let s0=PK.a<iso?PK.a:iso,e0=PK.a<iso?iso:PK.a;
+      if(PK.list.some(p=>!(e0<p.s||s0>p.e))){PK.msg='Этот период пересекается с уже выбранным. Выберите другие даты';PK.a=''}
+      else{PK.list.push({s:s0,e:e0});PK.list.sort((x,y)=>x.s<y.s?-1:1);PK.a='';PK.sel=-1}
+    }else{
+      const pi=pkIndexAt(iso);
+      if(pi>=0)PK.sel=(PK.sel===pi?-1:pi);
+      else{PK.a=iso;PK.sel=-1}
+    }
     renderPicker();return}
+  if(ch){const i=Number(ch.dataset.pksel);PK.sel=PK.sel===i?-1:i;PK.a='';PK.m=Number(PK.list[i].s.slice(5,7))-1;renderPicker();return}
+  if(del){if(PK.sel>=0)PK.list.splice(PK.sel,1);PK.sel=-1;renderPicker();return}
   if(nav){PK.m=Math.max(0,Math.min(11,PK.m+Number(nav.dataset.pkm)));renderPicker();return}
   if(x){closePicker(x.dataset.pkx==='ok');return}
   if(t.dataset&&t.dataset.pkclose)closePicker(false);
@@ -435,7 +465,7 @@ function holidaysCard(){
   return '<section class="card"><h2>Праздники и выходные 2027</h2><ul class="hlist">'+
     RED_LIST.map(r=>'<li><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></li>').join('')+
     WORK_LIST.map(r=>'<li class="work"><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></li>').join('')+
-    '</ul><div class="note">По ТК РФ в отпуск не засчитываются праздники: 1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября. Перенесённые выходные (9–10 января, 22 февраля, 3 и 10 мая, 14 июня, 5 ноября, 31 декабря) входят в отпуск как обычные дни.</div></section>';
+    '</ul></section>';
 }
 
 function viewMine(){
@@ -449,8 +479,8 @@ function viewMine(){
     '<span class="chip '+(left===0?'ok':left<0?'bad':'warn')+'">'+(left>=0?'Осталось <b>'+left+'</b>':'Превышение <b>'+(-left)+'</b>')+'</span>'+
     '<span class="chip '+(a.has14?'ok':'bad')+'">'+(a.has14?'✓ Есть часть от 14 дней':'Нужна часть от 14 дней')+'</span></div></section>';
 
-  h+='<section class="card"><div class="row" style="justify-content:space-between"><h2>Мои периоды</h2><span class="small muted">'+(S.dirty?'Есть несохранённые изменения':'')+'</span></div><div class="periods">';
-  if(!a.rows.length) h+='<div class="note">Периодов пока нет. Добавьте первый: одна из частей должна быть не короче 14 дней, остальные — любой длины.</div>';
+  h+='<section class="card"><div class="row" style="justify-content:space-between"><h2>Мои периоды</h2><span class="small muted">'+(S.dirty?'Есть несохранённые изменения':'')+'</span></div>'+
+    '<div class="leftbig '+(left===0&&a.has14?'ok':left<0?'bad':'')+'"><b>'+(left>=0?left:'+'+(-left))+'</b><span>'+(left>0?dayWord(left)+' осталось запланировать':left===0?'все дни запланированы':'дней сверх нормы')+(a.has14?'':' · нужна часть от 14 дней')+'</span></div><div class="periods">';
   a.rows.forEach((p,i)=>{
     const reds=(p.s&&p.e&&p.e>=p.s)?redIn(p.s,p.e):[];
     h+='<div class="prow"><button class="pbtn'+(p.s?'':' empty')+'" id="pb'+i+'" data-act="pick" data-i="'+i+'">'+(p.s&&p.e?fmtR(p.s,p.e):'Выберите даты')+'</button>'+
@@ -459,11 +489,10 @@ function viewMine(){
       (p.err&&p.s?'<div class="perr">'+esc(p.err)+'</div>':'')+
       (!p.err&&reds.length?'<div class="perr info"><span class="redtxt">Праздники: '+fmtDays(reds)+'</span>'+(p.days!==calLen(p.s,p.e)?' · '+(calLen(p.s,p.e)-p.days)+' дн. не засчитано':'')+'</div>':'')+'</div>';
   });
-  h+='</div><div class="row"><button class="btn" data-act="add-period" id="addp">+ Добавить период</button>'+
+  h+='</div><div class="row"><button class="btn'+(a.rows.length?'':' pri')+'" data-act="add-period" id="addp">'+(a.rows.length?'Изменить даты':'Выбрать даты отпуска')+'</button>'+
     '<button class="btn pri" data-act="save-plan" id="savep"'+(S.saving||!S.dirty?' disabled':'')+'>'+(S.saving?'Сохраняем…':'Сохранить')+'</button>'+
     (S.dirty?'<button class="btn ghost" data-act="reset-plan">Отменить изменения</button>':'')+
-    '<span class="status '+(S.msgKind||'')+'">'+esc(S.msg)+'</span></div>'+
-    '<div class="note">Праздники отмечены красным. В отпуск не засчитываются праздники по ТК РФ (1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября), выходные засчитываются.</div></section>';
+    '<span class="status '+(S.msgKind||'')+'">'+esc(S.msg)+'</span></div></section>';
 
   const mine=a.ok;const others=emps().filter(e=>e.id!==me.id);
   const ov=[];others.forEach(o=>okPeriods(o.id).forEach(q=>mine.forEach(p=>{const x=inter(p,q);if(x)ov.push({o,s:x.s,e:x.e})})));
@@ -774,7 +803,7 @@ document.addEventListener('click',async ev=>{
       history.replaceState(null,'',shareLink());S.msg='';toast('Подключено. Ссылку для коллег — кнопкой вверху');
     });
     return}
-  if(a==='add-period'){S.draft.push({s:'',e:''});render();openPicker(S.draft.length-1);return}
+  if(a==='add-period'){openPicker(null);return}
   if(a==='pick'){openPicker(i);return}
   if(a==='logout'){ls.set('otp.k','');location.replace(location.pathname);return}
   if(a==='xls'){exportExcel(S.tab==='team'&&S.filter!=='all'?S.filter:null);return}
