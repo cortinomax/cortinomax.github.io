@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d6b6a">
+<title>Отпуска команды</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap">
+<script>
+/* Подключение к базе Firebase. Можно оставить пустым: тогда руководитель один раз вставит
+   настройки на самой странице, и они попадут в ссылку для коллег. */
+window.FIREBASE_CONFIG = { apiKey: "AIzaSyCgg2Ycou7VD6-_hShzI4p-MSwTP4oay4o", projectId: "otpuska-574eb" };
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+/* Layout: sticky header with tabs; one working column; year timeline scrolls sideways inside its own box */
+:root{
+  color-scheme:light;
+  --bg:#f3f6f9; --surface:#ffffff; --sunk:#eaeff4; --ink:#15212f; --muted:#5a6879; --line:#d9e1ea;
+  --accent:#0d6b6a; --accent-ink:#ffffff; --clash:#cf4632; --ok:#2a8a52; --warn:#b8770f;
+  --d0:#7c8a99; --d1:#2f78c8; --d2:#cf861c; --d3:#8458c2; --d4:#2a9566; --d5:#c24d77; --d6:#4f7590;
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0e151d; --surface:#16202b; --sunk:#1c2834; --ink:#e5ecf3; --muted:#93a2b3; --line:#283543;
+  --accent:#3db3a8; --accent-ink:#06201e; --clash:#ff7a63; --ok:#5cc98a; --warn:#f0b24a;
+  --d0:#9aa8b6; --d1:#67a7ee; --d2:#f0ae4c; --d3:#b08cf0; --d4:#52c493; --d5:#ec7fa6; --d6:#8fb0c8;
+  color-scheme:dark}}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:12px}
+.brand{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.brand .yr{color:var(--accent)}
+.hd-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:3px;border-radius:9px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:500 14px var(--f-body);padding:7px 12px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+main{padding-block:20px 48px;display:grid;gap:20px}
+h1,h2{font-family:var(--f-display);font-weight:500;font-size:16px;margin:0;text-wrap:balance}
+h3{font-size:15px;font-weight:600;margin:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:14px;min-width:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+label.f{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:600 14px var(--f-body);border-radius:8px;padding:9px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted);padding:6px 8px}
+.btn.ghost:hover{color:var(--clash)}
+.link{background:none;border:0;padding:0;color:var(--accent);font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--sunk);font-size:13px;font-weight:500;white-space:nowrap}
+.chip b{font-weight:700}
+.chip.ok{color:var(--ok)} .chip.bad{color:var(--clash)} .chip.warn{color:var(--warn)}
+.dot{width:9px;height:9px;border-radius:3px;flex:none;display:inline-block}
+.periods{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:1fr 1fr 74px 36px;gap:8px;align-items:end}
+.prow .days{font-weight:700;font-size:15px;padding-bottom:9px}
+.prow .days.long{color:var(--accent)}
+.perr{grid-column:1/-1;color:var(--clash);font-size:13px;margin-top:-4px}
+.perr.info{color:var(--muted)}
+@media (max-width:520px){.prow{grid-template-columns:1fr 1fr}.prow .days{padding-bottom:0}}
+.addme{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.5fr) auto;gap:8px;align-items:end}
+@media (max-width:560px){.addme{grid-template-columns:1fr}}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.olist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.olist li{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:8px 10px;border-radius:8px;background:var(--sunk);font-size:14px}
+.olist li.same{background:color-mix(in srgb,var(--clash) 12%,var(--surface))}
+.tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--clash)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 11px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.filters button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--surface)}
+.tlbox{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);-webkit-overflow-scrolling:touch}
+.tl{min-width:880px;font-size:13px}
+.tl-row{display:grid;grid-template-columns:170px 1fr;border-top:1px solid var(--line);min-height:34px}
+.tl-row:first-child{border-top:0}
+@media (max-width:560px){.tl-row{grid-template-columns:120px 1fr}.tl{min-width:760px}}
+.tl-lab{position:sticky;left:0;z-index:2;background:var(--surface);padding:6px 10px;display:flex;align-items:center;gap:7px;border-right:1px solid var(--line);min-width:0}
+.tl-lab span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-row.me .tl-lab{font-weight:700}
+.tl-row.me .tl-track{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.tl-track{position:relative}
+.tl-head .tl-track{display:flex}
+.tl-head .tl-track span{flex:none;padding:7px 0 6px 5px;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;border-left:1px solid var(--line);overflow:hidden}
+.tl-head .tl-track span:first-child{border-left:0}
+.ml{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.hol{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--muted) 12%,transparent)}
+.bar{position:absolute;top:8px;bottom:8px;border-radius:4px;min-width:3px}
+.clash{position:absolute;top:4px;bottom:4px;border-radius:3px;border:2px solid var(--clash);background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--clash) 45%,transparent) 0 3px,transparent 3px 6px)}
+.tl-row.cov .tl-lab{color:var(--muted);font-size:12px}
+.cov .tl-track{display:flex}
+.cov .tl-track i{flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700;border-left:1px solid var(--surface)}
+.dirblock{display:grid;gap:10px}
+.dirhd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+table.st{width:100%;border-collapse:collapse;font-size:14px}
+table.st th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.st td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tblbox{overflow-x:auto}
+.empty{padding:28px 18px;text-align:center;color:var(--muted);display:grid;gap:8px;justify-items:center}
+.status{font-size:13px;color:var(--muted)}
+.status.err{color:var(--clash)} .status.good{color:var(--ok)}
+.banner{padding:10px 14px;border-radius:8px;background:color-mix(in srgb,var(--warn) 14%,var(--surface));font-size:14px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:22px;height:10px;border-radius:3px;vertical-align:middle;margin-right:5px}
+.share{display:grid;gap:8px}
+.share code{display:block;word-break:break-all;background:var(--sunk);padding:10px;border-radius:8px;font-size:12px;user-select:all}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:999px;font-size:14px;z-index:20}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap hd">
+  <div class="brand">Отпуска <span class="yr" id="yr">2027</span></div>
+  <div class="hd-r">
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <button class="btn sm" id="sharebtn" data-act="share" hidden>Ссылка для коллег</button>
+  </div>
+</div></header>
+<div class="wrap"><main id="main">
+  <div class="card empty"><h1>Загружаем общий график…</h1><div class="small">Здесь появятся отпуска всех сотрудников.</div></div>
+</main></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const MS=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const MN=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const HOL=['01-01','01-02','01-03','01-04','01-05','01-06','01-07','01-08','02-23','03-08','05-01','05-09','06-12','11-04'];
+const DAY=864e5;
+const pad=n=>String(n).padStart(2,'0');
+const toD=s=>{const [y,m,d]=s.split('-').map(Number);return Date.UTC(y,m-1,d)};
+const fromT=t=>{const d=new Date(t);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())};
+const isHol=t=>{const d=new Date(t);return HOL.includes(pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate()))};
+const countDays=(s,e)=>{let n=0;for(let t=toD(s);t<=toD(e);t+=DAY) if(!isHol(t)) n++;return n};
+const calLen=(s,e)=>(toD(e)-toD(s))/DAY+1;
+const inter=(a,b)=>{const s=Math.max(toD(a.s),toD(b.s)),e=Math.min(toD(a.e),toD(b.e));return s<=e?{s:fromT(s),e:fromT(e)}:null};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const dayWord=n=>{const a=n%10,b=n%100;return (a===1&&b!==11)?'день':(a>=2&&a<=4&&(b<12||b>14))?'дня':'дней'};
+function fmtR(s,e){const a=new Date(toD(s)),b=new Date(toD(e));
+  if(s===e) return a.getUTCDate()+' '+MS[a.getUTCMonth()];
+  if(a.getUTCMonth()===b.getUTCMonth()) return a.getUTCDate()+'–'+b.getUTCDate()+' '+MS[b.getUTCMonth()];
+  return a.getUTCDate()+' '+MS[a.getUTCMonth()]+' – '+b.getUTCDate()+' '+MS[b.getUTCMonth()];}
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- команда (фамилии сокращены до 3 букв; в базе хранятся только коды и даты) ---------- */
+const TEAM={
+  year:2027,
+  directions:['Целеполагание и БП','Ресурсное управление','Закупки и снабжение'],
+  employees:[
+    {id:'bp1',name:'Кор. О.',dir:'Целеполагание и БП',days:28},
+    {id:'bp2',name:'Бул. О.',dir:'Целеполагание и БП',days:28},
+    {id:'bp3',name:'Енг. О.',dir:'Целеполагание и БП',days:28},
+    {id:'ru1',name:'Коб. О.',dir:'Ресурсное управление',days:28},
+    {id:'ru2',name:'Нов. Т.',dir:'Ресурсное управление',days:28},
+    {id:'zs1',name:'Сит. И.',dir:'Закупки и снабжение',days:28},
+    {id:'zs2',name:'Дег. Е.',dir:'Закупки и снабжение',days:28}
+  ]
+};
+
+/* ---------- подключение ---------- */
+const hp=new URLSearchParams(location.hash.slice(1));
+const FC=window.FIREBASE_CONFIG||{};
+let CFG={apiKey:(hp.get('a')||FC.apiKey||ls.get('otp.a')||'').trim(),projectId:(hp.get('p')||FC.projectId||ls.get('otp.p')||'').trim()};
+let KEY=(hp.get('k')||ls.get('otp.k')||'').trim();
+if(hp.get('a'))ls.set('otp.a',CFG.apiKey);
+if(hp.get('p'))ls.set('otp.p',CFG.projectId);
+if(hp.get('k'))ls.set('otp.k',KEY);
+const builtIn=!!(FC.apiKey&&FC.projectId);
+
+function shareLink(){
+  const p=new URLSearchParams();
+  if(!builtIn){p.set('p',CFG.projectId);p.set('a',CFG.apiKey)}
+  p.set('k',KEY);
+  return location.origin+location.pathname+'#'+p.toString();
+}
+let fdb=null,col=null,unsub=null,loadTimer=null;
+function connect(){
+  if(!window.firebase||!firebase.firestore) throw new Error('sdk');
+  const name='otp-'+CFG.projectId+'-'+CFG.apiKey.slice(-6);
+  const app=firebase.apps.find(x=>x.name===name)||firebase.initializeApp({apiKey:CFG.apiKey,projectId:CFG.projectId,authDomain:CFG.projectId+'.firebaseapp.com'},name);
+  fdb=firebase.firestore(app);
+  col=fdb.collection('teams').doc(KEY).collection('plans');
+}
+
+const S={state:'loading',fatal:'',data:{year:TEAM.year,directions:TEAM.directions,employees:TEAM.employees,plans:{}},
+  tab:ls.get('otp.tab')||'mine',me:ls.get('otp.me')||'',draft:[],dirty:false,saving:false,msg:'',msgKind:'',
+  filter:'all',stale:false};
+
+const year=()=>Number(S.data.year)||2027;
+const emps=()=>S.data.employees||[];
+const dirs=()=>S.data.directions||[];
+const empById=id=>emps().find(e=>e.id===id);
+const dirIdx=name=>{const i=dirs().indexOf(name);return i<0?0:(i%6)+1};
+const dirName=name=>name||'Без направления';
+const ent=e=>Number(e&&e.days)||28;
+
+function analyze(periods){
+  const y=String(year());
+  const rows=(periods||[]).map(p=>({s:p.s||'',e:p.e||''}));
+  rows.forEach(p=>{
+    if(!p.s||!p.e){p.err='Укажите обе даты';return}
+    if(p.e<p.s){p.err='Дата окончания раньше начала';return}
+    if(!p.s.startsWith(y+'-')||!p.e.startsWith(y+'-')){p.err='Обе даты должны быть в '+y+' году';return}
+    p.days=countDays(p.s,p.e);
+    if(!p.days) p.err='В периоде только праздничные дни';
+  });
+  rows.forEach((p,i)=>{if(p.err)return;rows.forEach((q,j)=>{if(i!==j&&!q.err&&inter(p,q))p.err='Пересекается с другим вашим периодом'})});
+  const ok=rows.filter(p=>!p.err);
+  return {rows,ok,total:ok.reduce((a,p)=>a+p.days,0),has14:ok.some(p=>p.days>=14)};
+}
+function okPeriods(empId){return analyze(S.data.plans[empId]).ok}
+function status(e,periods){
+  const a=analyze(periods!==undefined?periods:S.data.plans[e.id]);const E=ent(e);
+  if(!a.ok.length) return {k:'none',t:'Не заполнено',a};
+  if(a.total>E) return {k:'bad',t:'Превышение на '+(a.total-E)+' дн.',a};
+  if(!a.has14) return {k:'bad',t:'Нет части от 14 дней',a};
+  if(a.total<E) return {k:'warn',t:'Осталось '+(E-a.total)+' дн.',a};
+  return {k:'ok',t:'Готово',a};
+}
+
+/* ---------- шкала года ---------- */
+function timeline(rows,opts){
+  opts=opts||{};const y=year(),y0=Date.UTC(y,0,1),N=(Date.UTC(y+1,0,1)-y0)/DAY;
+  const pos=(s,e)=>{const a=(toD(s)-y0)/DAY,b=(toD(e)-y0)/DAY+1;return 'left:'+(a/N*100)+'%;width:'+((b-a)/N*100)+'%'};
+  let head='',lines='',hol='';
+  for(let m=0;m<12;m++){const d=(Date.UTC(y,m+1,1)-Date.UTC(y,m,1))/DAY;head+='<span style="width:'+(d/N*100)+'%">'+MN[m]+'</span>';
+    if(m) lines+='<b class="ml" style="left:'+((Date.UTC(y,m,1)-y0)/DAY/N*100)+'%"></b>';}
+  HOL.forEach(h=>{const t=toD(y+'-'+h);hol+='<b class="hol" style="'+pos(fromT(t),fromT(t))+'"></b>'});
+  let h='<div class="tlbox"><div class="tl"><div class="tl-row tl-head"><div class="tl-lab muted small">'+esc(opts.corner||'Сотрудник')+'</div><div class="tl-track">'+head+'</div></div>';
+  rows.forEach(r=>{
+    h+='<div class="tl-row'+(r.me?' me':'')+'"><div class="tl-lab" title="'+esc(r.label)+'"><span class="dot" style="background:var(--d'+r.c+')"></span><span class="n">'+esc(r.label)+'</span></div><div class="tl-track">'+lines+hol;
+    r.periods.forEach(p=>{h+='<i class="bar" style="'+pos(p.s,p.e)+';background:var(--d'+r.c+')" title="'+esc(fmtR(p.s,p.e))+'"></i>'});
+    (r.clash||[]).forEach(p=>{h+='<i class="clash" style="'+pos(p.s,p.e)+'" title="Пересечение: '+esc(fmtR(p.s,p.e))+'"></i>'});
+    h+='</div></div>';
+  });
+  if(opts.coverage){
+    const cnt=new Array(N).fill(0);
+    rows.forEach(r=>{const seen=new Set();r.periods.forEach(p=>{for(let t=toD(p.s);t<=toD(p.e);t+=DAY){const i=(t-y0)/DAY;if(!seen.has(i)){seen.add(i);cnt[i]++}}})});
+    const size=rows.length;let cells='';
+    for(let w=0;w*7<N;w++){const a=w*7,b=Math.min(N,a+7);let mx=0;for(let i=a;i<b;i++)mx=Math.max(mx,cnt[i]);
+      const share=size?mx/size:0;const hot=mx>=2&&share>=0.5;
+      const bg=mx?(hot?'color-mix(in srgb,var(--clash) '+Math.round(30+share*50)+'%,transparent)':'color-mix(in srgb,var(--accent) '+Math.round(15+share*45)+'%,transparent)'):'transparent';
+      cells+='<i style="width:'+((b-a)/N*100)+'%;background:'+bg+'" title="Неделя с '+esc(fmtR(fromT(y0+a*DAY),fromT(y0+a*DAY)))+': одновременно в отпуске до '+mx+' из '+size+'">'+(mx||'')+'</i>';}
+    h+='<div class="tl-row cov"><div class="tl-lab">Одновременно в отпуске</div><div class="tl-track">'+cells+'</div></div>';
+  }
+  return h+'</div></div>';
+}
+function pairOverlaps(list){
+  const out=[];
+  for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){
+    const A=list[i],B=list[j];
+    A.periods.forEach(p=>B.periods.forEach(q=>{const x=inter(p,q);if(x)out.push({a:A.emp,b:B.emp,s:x.s,e:x.e})}));
+  }
+  return out.sort((x,y)=>x.s<y.s?-1:1);
+}
+
+/* ---------- отрисовка ---------- */
+function renderTabs(){
+  const show=S.state==='ready';
+  const t=[['mine','Мой график'],['team','Команда']];
+  document.getElementById('tabs').innerHTML=show?t.map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.tab===x[0])+'">'+x[1]+'</button>').join(''):'';
+  document.getElementById('tabs').hidden=!show;
+  document.getElementById('sharebtn').hidden=!show;
+  document.getElementById('yr').textContent=year();
+}
+function render(){
+  const act=document.activeElement&&document.activeElement.id;
+  renderTabs();
+  const m=document.getElementById('main');
+  if(S.state==='setup'){m.innerHTML=viewSetup();}
+  else if(S.state==='loading'){m.innerHTML='<div class="card empty"><h1>Загружаем общий график…</h1><div class="small">Здесь появятся отпуска всех сотрудников.</div></div>';}
+  else if(S.state==='error'){m.innerHTML='<div class="card empty"><h1>Не удалось открыть график</h1><div class="small">'+esc(S.fatal)+'</div><button class="btn" data-act="retry">Попробовать снова</button></div>';}
+  else if(S.state==='nolink'){m.innerHTML='<div class="card empty"><h1>Откройте страницу по ссылке</h1><div class="small">Попросите у руководителя ссылку на график отпусков: в ней есть доступ к общей базе.</div></div>';}
+  else{
+    const pre=S.stale?'<div class="banner">Нет связи с общей базой. Показаны последние полученные данные, сохранение может не пройти.</div>':'';
+    m.innerHTML=pre+(S.tab==='team'?viewTeam():viewMine());
+  }
+  if(act){const el=document.getElementById(act);if(el)el.focus()}
+}
+
+function viewSetup(){
+  return '<section class="card"><h1>Подключение к базе</h1>'+
+    '<div class="note">Этот экран нужен только руководителю один раз. Коллеги его не увидят: они получат готовую ссылку.</div>'+
+    '<label class="f" for="scfg">Вставьте целиком блок firebaseConfig из настроек проекта Firebase<textarea id="scfg" rows="7" style="font:13px/1.4 ui-monospace,Menlo,monospace;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;…&quot;,&#10;  projectId: &quot;…&quot;,&#10;  …&#10;};"></textarea></label>'+
+    '<label class="f" for="skey">Ключ команды<input id="skey" value="'+esc(KEY||'aacdqcksp4zy')+'" autocapitalize="off" autocomplete="off"></label>'+
+    '<div class="row"><button class="btn pri" data-act="connect" id="sconn">Подключить</button><span class="status '+(S.msgKind||'')+'">'+esc(S.msg)+'</span></div></section>';
+}
+
+function empOptions(sel){
+  let h='<option value="">— выберите себя —</option>';
+  const groups=dirs().slice();if(emps().some(e=>!e.dir))groups.push('');
+  groups.forEach(g=>{const list=emps().filter(e=>(e.dir||'')===g);
+    if(!list.length)return;h+='<optgroup label="'+esc(dirName(g))+'">'+list.map(e=>'<option value="'+esc(e.id)+'"'+(e.id===sel?' selected':'')+'>'+esc(e.name)+'</option>').join('')+'</optgroup>'});
+  return h;
+}
+function viewMine(){
+  const me=empById(S.me);
+  let h='<section class="card"><h2>Кто заполняет</h2>';
+  h+='<label class="f" for="me">Выберите себя из списка<select id="me">'+empOptions(S.me)+'</select></label>';
+  if(!me) return h+'<div class="note">После выбора появятся ваши периоды и пересечения с коллегами.</div></section>';
+  const a=analyze(S.draft),E=ent(me),left=E-a.total;
+  h+='<div class="stats"><span class="chip"><span class="dot" style="background:var(--d'+dirIdx(me.dir)+')"></span>'+esc(dirName(me.dir))+'</span>'+
+    '<span class="chip">Положено <b>'+E+'</b></span><span class="chip">Запланировано <b>'+a.total+'</b></span>'+
+    '<span class="chip '+(left===0?'ok':left<0?'bad':'warn')+'">'+(left>=0?'Осталось <b>'+left+'</b>':'Превышение <b>'+(-left)+'</b>')+'</span>'+
+    '<span class="chip '+(a.has14?'ok':'bad')+'">'+(a.has14?'✓ Есть часть от 14 дней':'Нужна часть от 14 дней')+'</span></div></section>';
+
+  h+='<section class="card"><div class="row" style="justify-content:space-between"><h2>Мои периоды</h2><span class="small muted">'+(S.dirty?'Есть несохранённые изменения':'')+'</span></div><div class="periods">';
+  if(!a.rows.length) h+='<div class="note">Периодов пока нет. Добавьте первый: одна из частей должна быть не короче 14 дней, остальные — любой длины.</div>';
+  a.rows.forEach((p,i)=>{
+    h+='<div class="prow"><label class="f" for="ps'+i+'">Начало<input type="date" id="ps'+i+'" class="pd" data-i="'+i+'" data-k="s" value="'+esc(p.s)+'" min="'+year()+'-01-01" max="'+year()+'-12-31"></label>'+
+      '<label class="f" for="pe'+i+'">Окончание<input type="date" id="pe'+i+'" class="pd" data-i="'+i+'" data-k="e" value="'+esc(p.e)+'" min="'+(p.s||year()+'-01-01')+'" max="'+year()+'-12-31"></label>'+
+      '<div class="days'+(p.days>=14?' long':'')+'">'+(p.err?'—':p.days+' '+dayWord(p.days))+'</div>'+
+      '<button class="btn ghost" data-act="del-period" data-i="'+i+'" aria-label="Удалить период" title="Удалить период">✕</button>'+
+      (p.err?'<div class="perr">'+esc(p.err)+'</div>':(p.days!==calLen(p.s,p.e)?'<div class="perr info">'+(calLen(p.s,p.e)-p.days)+' праздн. не засчитано</div>':''))+'</div>';
+  });
+  h+='</div><div class="row"><button class="btn" data-act="add-period" id="addp">+ Добавить период</button>'+
+    '<button class="btn pri" data-act="save-plan" id="savep"'+(S.saving||!S.dirty?' disabled':'')+'>'+(S.saving?'Сохраняем…':'Сохранить')+'</button>'+
+    (S.dirty?'<button class="btn ghost" data-act="reset-plan">Отменить изменения</button>':'')+
+    '<span class="status '+(S.msgKind||'')+'">'+esc(S.msg)+'</span></div>'+
+    '<div class="note">Праздничные дни (1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября) в отпуск не засчитываются, как в ТК РФ. Выходные засчитываются.</div></section>';
+
+  const mine=a.ok;const others=emps().filter(e=>e.id!==me.id);
+  const ov=[];others.forEach(o=>okPeriods(o.id).forEach(q=>mine.forEach(p=>{const x=inter(p,q);if(x)ov.push({o,s:x.s,e:x.e})})));
+  ov.sort((x,y)=>(x.o.dir===me.dir?0:1)-(y.o.dir===me.dir?0:1)||(x.s<y.s?-1:1));
+  h+='<section class="card"><h2>Пересечения с коллегами</h2>';
+  if(!mine.length) h+='<div class="note">Добавьте даты, и здесь появятся коллеги, которые отдыхают в то же время.</div>';
+  else if(!ov.length) h+='<div><span class="chip ok">✓ Ни с кем не пересекаетесь</span></div>';
+  else h+='<ul class="olist">'+ov.map(x=>{const same=x.o.dir===me.dir;return '<li class="'+(same?'same':'')+'"><span class="dot" style="background:var(--d'+dirIdx(x.o.dir)+')"></span><b>'+esc(x.o.name)+'</b><span class="muted">'+esc(dirName(x.o.dir))+'</span><span>'+fmtR(x.s,x.e)+' · '+calLen(x.s,x.e)+' дн.</span>'+(same?'<span class="tag">Ваше направление</span>':'')+'</li>'}).join('')+'</ul>';
+  const sorted=others.slice().sort((x,y)=>(x.dir===me.dir?0:1)-(y.dir===me.dir?0:1));
+  const rows=[{label:me.name+' (вы)',c:dirIdx(me.dir),me:true,periods:mine,clash:ov.map(x=>({s:x.s,e:x.e}))}]
+    .concat(sorted.map(o=>{const ps=okPeriods(o.id);const cl=[];ps.forEach(q=>mine.forEach(p=>{const x=inter(p,q);if(x)cl.push(x)}));return {label:o.name,c:dirIdx(o.dir),periods:ps,clash:cl}}));
+  h+=timeline(rows,{corner:'Год '+year()})+'<div class="legend"><span><i style="background:var(--d1)"></i>отпуск (цвет — направление)</span><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение с вами</span><span><i style="background:color-mix(in srgb,var(--muted) 25%,transparent)"></i>праздники</span></div></section>';
+  return h;
+}
+
+function viewTeam(){
+  if(!emps().length) return '<div class="card empty"><h2>Сотрудников пока нет</h2><div class="small">Добавьте себя на вкладке «Мой график».</div></div>';
+  const groups=dirs().map(d=>({id:d,name:d,c:dirIdx(d)}));
+  if(emps().some(e=>!e.dir))groups.push({id:'',name:'Без направления',c:0});
+  const inG=(e,g)=>(e.dir||'')===g.id;
+  if(S.filter!=='all'&&!groups.find(g=>g.id===S.filter))S.filter='all';
+  let h='<section class="card"><h2>Команда по направлениям</h2><div class="filters">'+
+    '<button data-f="all" aria-pressed="'+(S.filter==='all')+'">Все · '+emps().length+'</button>'+
+    groups.filter(g=>emps().some(e=>inG(e,g))).map(g=>'<button data-f="'+esc(g.id)+'" aria-pressed="'+(S.filter===g.id)+'"><span class="dot" style="background:var(--d'+g.c+')"></span>'+esc(g.name)+' · '+emps().filter(e=>inG(e,g)).length+'</button>').join('')+'</div>';
+  groups.filter(g=>S.filter==='all'||g.id===S.filter).forEach(g=>{
+    const list=emps().filter(e=>inG(e,g));if(!list.length)return;
+    const L=list.map(e=>({emp:e,periods:okPeriods(e.id)}));
+    const ov=pairOverlaps(L);
+    const rows=L.map(x=>({label:x.emp.name,c:g.c,periods:x.periods,clash:ov.filter(o=>o.a===x.emp||o.b===x.emp).map(o=>({s:o.s,e:o.e}))}));
+    h+='<div class="dirblock"><div class="dirhd"><span class="dot" style="background:var(--d'+g.c+')"></span><h3>'+esc(g.name)+'</h3><span class="small muted">'+list.length+' чел. · пересечений внутри: '+ov.length+'</span></div>'+timeline(rows,{coverage:true,corner:g.name})+'</div>';
+  });
+  h+='<div class="legend"><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение внутри направления</span><span><i style="background:color-mix(in srgb,var(--clash) 60%,transparent)"></i>в отпуске половина направления и больше</span></div></section>';
+
+  const scope=emps().filter(e=>S.filter==='all'||(e.dir||'')===S.filter);
+  const all=pairOverlaps(scope.map(e=>({emp:e,periods:okPeriods(e.id)})));
+  const same=all.filter(o=>o.a.dir===o.b.dir),cross=all.filter(o=>o.a.dir!==o.b.dir);
+  const li=o=>'<li class="'+(o.a.dir===o.b.dir?'same':'')+'"><b>'+esc(o.a.name)+'</b><span class="muted">и</span><b>'+esc(o.b.name)+'</b><span>'+fmtR(o.s,o.e)+' · '+calLen(o.s,o.e)+' дн.</span>'+(o.a.dir===o.b.dir?'<span class="tag">'+esc(dirName(o.a.dir))+'</span>':'<span class="muted small">'+esc(dirName(o.a.dir))+' / '+esc(dirName(o.b.dir))+'</span>')+'</li>';
+  h+='<section class="card"><h2>Пересечения</h2>';
+  if(!all.length) h+='<div><span class="chip ok">✓ Пересечений нет</span></div>';
+  else{
+    h+='<div class="eyebrow">Внутри направления · '+same.length+'</div>'+(same.length?'<ul class="olist">'+same.map(li).join('')+'</ul>':'<div class="small muted">Нет</div>');
+    if(S.filter==='all') h+='<div class="eyebrow">Между направлениями · '+cross.length+'</div>'+(cross.length?'<ul class="olist">'+cross.map(li).join('')+'</ul>':'<div class="small muted">Нет</div>');
+  }
+  h+='</section>';
+
+  const done=scope.filter(e=>status(e).k==='ok').length;
+  h+='<section class="card"><div class="row" style="justify-content:space-between"><h2>Кто сколько заполнил</h2><span class="chip">Готово <b>'+done+'</b> из '+scope.length+'</span></div><div class="tblbox"><table class="st"><thead><tr><th>ФИО</th><th>Направление</th><th>Дней</th><th>Части</th><th>Статус</th></tr></thead><tbody>'+
+    scope.map(e=>{const s=status(e);return '<tr><td>'+esc(e.name)+'</td><td><span class="dot" style="background:var(--d'+dirIdx(e.dir)+')"></span> '+esc(dirName(e.dir))+'</td><td>'+s.a.total+'&nbsp;/&nbsp;'+ent(e)+'</td><td class="small">'+(s.a.ok.map(p=>fmtR(p.s,p.e)+' ('+p.days+')').join(', ')||'—')+'</td><td><span class="chip '+(s.k==='ok'?'ok':s.k==='bad'?'bad':s.k==='warn'?'warn':'')+'">'+s.t+'</span></td></tr>'}).join('')+
+    '</tbody></table></div></section>';
+  return h;
+}
+
+/* ---------- данные ---------- */
+function applyPlans(p){
+  S.data.plans=p;
+  if(S.me&&!empById(S.me)){S.me='';ls.set('otp.me','')}
+  if(!S.dirty)S.draft=clone(S.data.plans[S.me]||[]);
+  S.state='ready';
+}
+function errText(e){
+  const c=e&&e.code;
+  if(c==='permission-denied')return 'База не принимает изменения. Попросите у руководителя актуальную ссылку.';
+  if(c==='unavailable')return 'Нет связи с базой. Проверьте интернет и попробуйте ещё раз.';
+  return 'Не удалось сохранить. Проверьте интернет и попробуйте ещё раз.';
+}
+function subscribe(onFirst){
+  if(unsub)unsub();
+  clearTimeout(loadTimer);
+  let first=true;
+  loadTimer=setTimeout(()=>{
+    if(S.state==='ready'){S.stale=true}
+    else{S.state='error';S.fatal='Нет связи с общей базой. Если вы в рабочей сети банка, откройте ссылку с телефона через мобильный интернет.'}
+    render();
+  },12000);
+  unsub=col.onSnapshot({includeMetadataChanges:true},snap=>{
+    const p={};snap.docs.forEach(d=>{const v=d.data();p[d.id]=(v.periods||[]).map(x=>({s:x.s,e:x.e}))});
+    if(!snap.metadata.fromCache){clearTimeout(loadTimer);S.stale=false}
+    applyPlans(p);
+    if(first){first=false;if(onFirst)onFirst(null)}
+    render();
+  },err=>{
+    clearTimeout(loadTimer);
+    if(first&&onFirst){first=false;onFirst(err);return}
+    if(err&&err.code==='permission-denied'){S.state='error';S.fatal='Ссылка устарела или ключ неверный. Попросите у руководителя актуальную ссылку.'}
+    else if(S.state==='ready'){S.stale=true}
+    else{S.state='error';S.fatal='Нет связи с общей базой. Если вы в рабочей сети банка, откройте ссылку с телефона через мобильный интернет.'}
+    render();
+  });
+}
+
+/* ---------- действия ---------- */
+let toastT;
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{el.hidden=true},2600)}
+async function copy(text){
+  try{await navigator.clipboard.writeText(text);toast('Ссылка скопирована');return true}catch(e){return false}
+}
+function setMe(id){S.me=id;ls.set('otp.me',id);S.draft=clone(S.data.plans[id]||[]);S.dirty=false;S.msg='';S.adding=false}
+
+document.addEventListener('click',async ev=>{
+  const t=ev.target.closest('[data-tab],[data-act],[data-f]');if(!t)return;
+  if(t.dataset.tab){S.tab=t.dataset.tab;ls.set('otp.tab',S.tab);render();window.scrollTo(0,0);return}
+  if(t.dataset.f!==undefined){S.filter=t.dataset.f;render();return}
+  const a=t.dataset.act,i=Number(t.dataset.i);
+  if(a==='share'){
+    const link=shareLink();
+    if(navigator.share){try{await navigator.share({title:'Отпуска '+year(),text:'Внесите, пожалуйста, свои отпуска на '+year()+' год',url:link});return}catch(e){if(e&&e.name==='AbortError')return}}
+    if(!(await copy(link))){window.prompt('Скопируйте ссылку',link)}
+    return}
+  if(a==='retry'){location.reload();return}
+  if(a==='connect'){
+    const txt=document.getElementById('scfg').value;
+    const ak=(txt.match(/apiKey["']?\s*:\s*["']([^"']+)["']/)||[])[1];
+    const pid=(txt.match(/projectId["']?\s*:\s*["']([^"']+)["']/)||[])[1];
+    const key=document.getElementById('skey').value.trim();
+    if(!ak||!pid){S.msg='Не нашёл apiKey и projectId. Вставьте блок firebaseConfig целиком.';S.msgKind='err';render();return}
+    if(!/^[A-Za-z0-9_-]{6,}$/.test(key)){S.msg='Ключ команды: латиница и цифры, от 6 символов';S.msgKind='err';render();return}
+    CFG={apiKey:ak,projectId:pid};KEY=key;
+    S.msg='Проверяем…';S.msgKind='';render();
+    try{connect()}catch(e){S.msg='Не загрузилась библиотека Firebase. Проверьте интернет.';S.msgKind='err';render();return}
+    subscribe(err=>{
+      if(err){S.state='setup';S.msg=err.code==='permission-denied'?'База отклонила доступ: проверьте, что правила опубликованы и ключ совпадает с правилами.':'Не удалось подключиться: '+(err.message||err.code);S.msgKind='err';render();return}
+      ls.set('otp.a',ak);ls.set('otp.p',pid);ls.set('otp.k',key);
+      history.replaceState(null,'',shareLink());S.msg='';toast('Подключено. Ссылку для коллег — кнопкой вверху');
+    });
+    return}
+  if(a==='add-period'){S.draft.push({s:'',e:''});S.dirty=true;S.msg='';render();const el=document.getElementById('ps'+(S.draft.length-1));if(el)el.focus();return}
+  if(a==='del-period'){S.draft.splice(i,1);S.dirty=true;S.msg='';render();return}
+  if(a==='reset-plan'){setMe(S.me);render();return}
+  if(a==='save-plan'){await savePlan();return}
+});
+document.addEventListener('change',ev=>{
+  const t=ev.target;
+  if(t.id==='me'){setMe(t.value);render();return}
+  if(t.classList.contains('pd')){const i=Number(t.dataset.i);S.draft[i][t.dataset.k]=t.value;
+    if(t.dataset.k==='s'&&t.value&&(!S.draft[i].e||S.draft[i].e<t.value))S.draft[i].e='';
+    S.dirty=true;S.msg='';render();
+    if(t.dataset.k==='s'&&!S.draft[i].e){const el=document.getElementById('pe'+i);if(el)el.focus()}}
+});
+async function savePlan(){
+  if(!S.me||S.saving)return;
+  const a=analyze(S.draft);
+  if(a.rows.some(p=>p.err)){S.msg='Исправьте периоды, отмеченные красным';S.msgKind='err';render();return}
+  const periods=a.ok.map(p=>({s:p.s,e:p.e,days:p.days})).sort((x,y)=>x.s<y.s?-1:1);
+  S.saving=true;render();
+  try{
+    await Promise.race([
+      col.doc(S.me).set({periods:periods.map(p=>({s:p.s,e:p.e})),updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
+      new Promise((_,rej)=>setTimeout(()=>rej({code:'unavailable'}),15000))
+    ]);
+    S.dirty=false;S.draft=clone(periods.map(p=>({s:p.s,e:p.e})));
+    const st=status(empById(S.me),S.draft);S.msg=st.k==='ok'?'Сохранено. График полностью готов':'Сохранено. '+st.t;S.msgKind=st.k==='ok'?'good':'';
+  }catch(e){S.msg=errText(e);S.msgKind='err'}
+  S.saving=false;render();
+}
+
+/* ---------- запуск ---------- */
+if(!CFG.apiKey||!CFG.projectId){S.state='setup';render()}
+else if(!KEY){S.state='nolink';render()}
+else{
+  render();
+  try{connect();subscribe()}
+  catch(e){S.state='error';S.fatal='Не загрузилась библиотека Firebase. Проверьте интернет или откройте ссылку с телефона.';render()}
+}
+})();
+</script>
+</body>
+</html>
