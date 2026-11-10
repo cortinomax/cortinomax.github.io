@@ -1,6 +1,6 @@
 {
- "name":"Хоопонопоно","short_name":"Хоопонопоно","lang":"ru",
+ "name":"Кино на вечер","short_name":"Кино","lang":"ru",
  "start_url":"./","scope":"./","display":"standalone",
- "background_color":"#0f1b2d","theme_color":"#0f1b2d",
+ "background_color":"#14111c","theme_color":"#14111c",
  "icons":[{"src":"icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
 }

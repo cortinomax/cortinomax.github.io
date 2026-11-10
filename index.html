@@ -3,489 +3,262 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f1b2d">
+<meta name="theme-color" content="#14111c">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Кино на вечер">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
-<meta name="apple-mobile-web-app-title" content="Хоопонопоно">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Хоопонопоно · ежедневная практика</title>
+<title>Кино на вечер</title>
 <style>
-:root{
-  --bg:#0f1b2d; --bg2:#16243a; --card:#1c2d47; --line:#2a3f5f;
-  --text:#e9eef6; --muted:#9fb0c8; --accent:#7cc4e8; --accent2:#a8e0c8; --warm:#f2c38b;
-}
+:root{--bg:#14111c;--card:#1f1a2b;--line:#33294a;--text:#f1edf7;--muted:#a79fbd;--acc:#ff8a5c;--acc2:#ffc46b;--ok:#7fd6a5}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
-body{padding:0 0 calc(84px + env(safe-area-inset-bottom))}
-header{padding:calc(18px + env(safe-area-inset-top)) 20px 6px}
-header h1{margin:0;font-size:22px;font-weight:600;letter-spacing:.2px}
-header p{margin:2px 0 0;color:var(--muted);font-size:14px}
-main{padding:8px 16px 20px;max-width:640px;margin:0 auto}
-section{margin-bottom:28px}
-h2{font-size:19px;font-weight:600;margin:10px 4px 12px}
-h3{font-size:16px;margin:0 0 6px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
-.muted{color:var(--muted);font-size:14px}
-.small{font-size:13px}
-button,.btn{font:inherit;border:0;border-radius:14px;padding:12px 16px;background:var(--line);color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
-button.primary{background:var(--accent);color:#0b1626;font-weight:600}
-button.ghost{background:transparent;border:1px solid var(--line)}
-button:active{transform:scale(.98)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.grow{flex:1}
-textarea,input,select{width:100%;font:inherit;color:var(--text);background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-textarea{min-height:80px;resize:vertical}
-ol.phrases{margin:6px 0 0;padding-left:22px;font-size:18px}
-ol.phrases li{margin:4px 0}
-
-/* phrase card */
-#phraseCard{min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;user-select:none;cursor:pointer;background:radial-gradient(circle at 50% 40%,#25406a 0%,var(--card) 70%)}
-#phraseText{font-size:28px;font-weight:600;line-height:1.25;transition:opacity .35s}
-#phraseHint{margin-top:12px}
-.dots{display:flex;gap:8px;justify-content:center;margin-top:14px}
-.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
-.dots i.on{background:var(--accent)}
-.big{font-size:34px;font-weight:700}
-
-/* checklist */
-.check{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
-.check:last-child{border-bottom:0}
-.check input{width:24px;height:24px;flex:none;accent-color:var(--accent2)}
-.check label{flex:1}
-
-/* streak */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
-.cal div{aspect-ratio:1;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
-.cal div.l1{background:#2f5a6e;color:var(--text)}
-.cal div.l2{background:#3e8a8a;color:#fff}
-.cal div.l3{background:var(--accent2);color:#0b1626;font-weight:600}
-.cal div.today{outline:2px solid var(--warm)}
-
-/* breath */
-#breathCircle{width:180px;height:180px;margin:10px auto;border-radius:50%;background:radial-gradient(circle,#7cc4e8 0%,#2b5a85 70%);transform:scale(.55);transition:transform 1s linear;display:flex;align-items:center;justify-content:center}
-#breathLabel{text-align:center;font-size:20px;font-weight:600}
-#breathCount{color:#0b1626;font-weight:700;font-size:30px}
-
-/* journal */
-.entry{border-top:1px solid var(--line);padding:10px 0}
-.entry:first-child{border-top:0}
-.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bg2);color:var(--muted);margin-right:6px}
-.done{opacity:.55}
-details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:10px}
-details summary{font-weight:600;cursor:pointer;list-style:none}
-details summary::-webkit-details-marker{display:none}
-details summary:after{content:"＋";float:right;color:var(--muted)}
-details[open] summary:after{content:"－"}
-details p,details li{color:#d4ddea}
-
-/* nav (JS only) */
-nav{display:none}
-.js nav{display:flex;position:fixed;left:0;right:0;bottom:0;background:rgba(15,27,45,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10}
-nav button{flex:1;background:none;padding:6px 2px;border-radius:10px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
-nav button span{font-size:21px;line-height:1}
-nav button.on{color:var(--accent)}
-.js section.tab{display:none}
-.js section.tab.on{display:block}
-.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--accent2);color:#0b1626;padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
-.toast.show{opacity:1}
-.nojs-note{background:#2b3550;border-radius:12px;padding:10px 14px;font-size:14px;color:var(--muted);margin:8px 0 16px}
-.js .nojs-note{display:none}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+header{padding:calc(14px + env(safe-area-inset-top)) 16px 8px;position:sticky;top:0;background:rgba(20,17,28,.96);backdrop-filter:blur(10px);z-index:5;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:22px}
+.sub{color:var(--muted);font-size:13px;margin-top:2px}
+main{padding:12px 14px calc(30px + env(safe-area-inset-bottom));max-width:680px;margin:0 auto}
+input[type=search]{width:100%;font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:10px}
+.row{display:flex;gap:8px;align-items:center}
+.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 2px 6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:7px 12px;font:inherit;font-size:14px;white-space:nowrap}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#1a0f08;font-weight:600}
+.bar{display:flex;gap:8px;margin:14px 0 4px}
+.btn{flex:1;font:inherit;font-weight:600;border:0;border-radius:14px;padding:12px;background:var(--line);color:var(--text)}
+.btn.main{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0f08}
+.btn:active,.chip:active{transform:scale(.97)}
+.count{color:var(--muted);font-size:13px;margin:10px 2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.card.hl{border-color:var(--acc2);box-shadow:0 0 0 2px rgba(255,196,107,.35)}
+.card h3{margin:0;font-size:18px}
+.orig{color:var(--muted);font-size:13px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag{font-size:12px;border-radius:999px;padding:3px 9px;background:#2a2340;color:#d8d0ea}
+.tag.m{background:#3a2a2a;color:#ffd2bd}
+.tag.t{background:#203a30;color:#bff0d6}
+.card p{margin:6px 0 10px;color:#ddd6ea}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button,.acts a{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:10px;padding:7px 10px;text-decoration:none}
+.acts button.on{background:var(--ok);border-color:var(--ok);color:#0d2418;font-weight:600}
+.acts button.want.on{background:var(--acc2);border-color:var(--acc2);color:#2a1a00}
+.card.seen{opacity:.55}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:10px}
+.toggle input{width:20px;height:20px;accent-color:var(--acc)}
 </style>
 </head>
 <body>
-<script>document.documentElement.classList.add('js')</script>
-
 <header>
-  <h1>Хоопонопоно</h1>
-  <p id="today">Очищение — каждый день</p>
+  <h1>🍿 Кино на вечер</h1>
+  <div class="sub" id="sub">Захватывающие фильмы и короткие сериалы для вечера вдвоём</div>
+  <input type="search" id="q" placeholder="Поиск по названию или описанию">
 </header>
-
 <main>
-<div class="nojs-note">Интерактивные функции (счётчик, дыхание, дневник) отключены в этом режиме просмотра. Ниже — фразы и вся практика в текстовом виде.</div>
+  <div class="lbl">Настроение</div>
+  <div class="chips" id="moods"></div>
+  <div class="lbl">Жанр</div>
+  <div class="chips" id="genres"></div>
+  <div class="lbl">Формат</div>
+  <div class="chips" id="formats"></div>
+  <div class="lbl">Список</div>
+  <div class="chips" id="lists"></div>
+  <label class="toggle"><input type="checkbox" id="hideSeen"> Скрыть уже просмотренное</label>
 
-<!-- ========== СЕГОДНЯ ========== -->
-<section class="tab on" id="t-today">
-  <h2>Сегодня</h2>
-
-  <div class="card">
-    <h3>Четыре фразы</h3>
-    <ol class="phrases">
-      <li>Мне очень жаль.</li>
-      <li>Пожалуйста, прости меня.</li>
-      <li>Спасибо тебе.</li>
-      <li>Я люблю тебя.</li>
-    </ol>
-    <p class="muted small" style="margin:8px 0 0">Обращение — к Божественному / Источнику внутри себя, а не к другому человеку. Порядок не важен, важна искренность и регулярность. Если времени нет — достаточно «Я люблю тебя».</p>
+  <div class="bar">
+    <button class="btn main" id="random">🎲 Выбрать за нас</button>
+    <button class="btn" id="reset">Сбросить</button>
   </div>
-
-  <div class="card">
-    <h3>Ритуал дня</h3>
-    <div id="checklist">
-      <div class="check"><input type="checkbox" id="c-morning" data-k="morning"><label for="c-morning"><b>Утро.</b> Намерение: «Сегодня я беру 100% ответственность за всё, что появляется в моей жизни». 3 круга фраз.</label></div>
-      <div class="check"><input type="checkbox" id="c-breath" data-k="breath"><label for="c-breath"><b>Дыхание ХА.</b> 9 кругов (вдох 7 — пауза 7 — выдох 7 — пауза 7).</label></div>
-      <div class="check"><input type="checkbox" id="c-moment" data-k="moment"><label for="c-moment"><b>В моменте.</b> Почувствовал раздражение, страх, оценку — очистил прямо там, хотя бы мысленно.</label></div>
-      <div class="check"><input type="checkbox" id="c-person" data-k="person"><label for="c-person"><b>Человек или ситуация.</b> Очистил то, что сегодня «цепляет» (записать в дневник).</label></div>
-      <div class="check"><input type="checkbox" id="c-evening" data-k="evening"><label for="c-evening"><b>Вечер.</b> Пересмотр дня: что всплыло — то очищаю. Благодарность за день.</label></div>
-    </div>
-  </div>
-
-  <div class="card" id="statsCard" hidden>
-    <div class="row">
-      <div class="grow"><div class="muted small">Серия дней</div><div class="big" id="streak">0</div></div>
-      <div class="grow"><div class="muted small">Кругов сегодня</div><div class="big" id="cyclesToday">0</div></div>
-      <div class="grow"><div class="muted small">Всего кругов</div><div class="big" id="cyclesTotal">0</div></div>
-    </div>
-    <div class="cal" id="cal"></div>
-    <p class="muted small" style="margin:8px 0 0">Последние 28 дней. Цвет ярче — больше практики.</p>
-  </div>
-
-  <div class="card" id="thoughtCard" hidden>
-    <div class="muted small">Мысль дня</div>
-    <div id="thought" style="font-size:18px;margin-top:4px"></div>
-  </div>
-</section>
-
-<!-- ========== ОЧИЩЕНИЕ ========== -->
-<section class="tab" id="t-clean">
-  <h2>Очищение</h2>
-  <div class="card">
-    <label class="muted small" for="target">Что очищаю сейчас (необязательно)</label>
-    <input id="target" placeholder="напр.: тревога из-за совещания, отношение к N…">
-  </div>
-  <div class="card" id="phraseCard" role="button" aria-label="Следующая фраза">
-    <div id="phraseText">Нажмите, чтобы начать</div>
-    <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
-    <div id="phraseHint" class="muted small">Касание — следующая фраза. Произносите про себя или вслух.</div>
-  </div>
-  <div class="row" style="margin-bottom:12px">
-    <div class="card grow" style="margin:0;text-align:center"><div class="muted small">Кругов в сессии</div><div class="big" id="sessCycles">0</div></div>
-    <div class="card grow" style="margin:0;text-align:center"><div class="muted small">Сегодня</div><div class="big" id="sessToday">0</div></div>
-  </div>
-  <div class="row">
-    <button class="ghost grow" id="autoBtn">▶ Автоповтор</button>
-    <button class="primary grow" id="finishBtn">Завершить и записать</button>
-  </div>
-  <p class="muted small">Автоповтор сменяет фразы каждые 4 секунды. Если появляются мысли «а это работает?» — это тоже память, её тоже можно очищать.</p>
-</section>
-
-<!-- ========== ДЫХАНИЕ ========== -->
-<section class="tab" id="t-breath">
-  <h2>Дыхание ХА</h2>
-  <div class="card">
-    <div id="breathCircle"><div id="breathCount">7</div></div>
-    <div id="breathLabel">Готовы?</div>
-    <p class="muted small" style="text-align:center;margin:6px 0 12px">Круг <span id="breathRound">0</span> из <span id="breathTotal">9</span></p>
-    <div class="row">
-      <select id="breathRounds" class="grow" style="width:auto">
-        <option value="3">3 круга</option>
-        <option value="7">7 кругов</option>
-        <option value="9" selected>9 кругов</option>
-      </select>
-      <select id="breathSec" class="grow" style="width:auto">
-        <option value="4">по 4 счёта</option>
-        <option value="5">по 5 счётов</option>
-        <option value="7" selected>по 7 счётов</option>
-      </select>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <button class="primary grow" id="breathBtn">Начать</button>
-    </div>
-  </div>
-  <div class="card">
-    <p style="margin:0">Сядьте с прямой спиной, стопы на полу. Вдох через нос на 7 счётов, задержка на 7, выдох на 7, задержка на 7 — это один круг. Если 7 тяжело — начните с 4. На выдохе можно мысленно говорить «Я люблю тебя».</p>
-  </div>
-</section>
-
-<!-- ========== ДНЕВНИК ========== -->
-<section class="tab" id="t-journal">
-  <h2>Дневник очищения</h2>
-  <div class="card">
-    <label class="muted small" for="jText">Что всплыло? (человек, ситуация, чувство, мысль)</label>
-    <textarea id="jText" placeholder="Опишите коротко — без оценок. Это просто память, которая проигрывается."></textarea>
-    <div class="row" style="margin-top:8px">
-      <select id="jKind" class="grow" style="width:auto">
-        <option>Чувство</option><option>Человек</option><option>Работа</option><option>Деньги</option><option>Здоровье</option><option>Семья</option><option>Другое</option>
-      </select>
-      <button class="primary" id="jAdd">Добавить</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="row"><h3 class="grow" style="margin:0">Записи</h3>
-      <select id="jFilter" style="width:auto"><option value="open">В работе</option><option value="all">Все</option><option value="done">Отпущено</option></select>
-    </div>
-    <div id="jList" style="margin-top:8px"></div>
-  </div>
-</section>
-
-<!-- ========== ПРИНЦИПЫ ========== -->
-<section class="tab" id="t-learn">
-  <h2>Суть метода</h2>
-  <details open><summary>100% ответственность</summary>
-    <p>Всё, что появляется в моём опыте — люди, события, проблемы — проходит через меня. Не «я виноват», а «это во мне, значит, я могу это очистить». Работа идёт не с другим человеком, а с тем, что во мне на него откликается.</p></details>
-  <details><summary>Память и вдохновение</summary>
-    <p>Решения приходят либо из памяти (старые программы, страхи, привычные реакции), либо из вдохновения. Очищение стирает память, чтобы освободить место вдохновению. Мы не знаем, что именно стирается — и это не обязательно знать.</p></details>
-  <details><summary>Нулевое состояние</summary>
-    <p>Цель — не получить конкретный результат, а вернуться в «ноль»: состояние без ограничений и без программ. Из него действие становится точным. Отпускайте ожидания того, как и когда «должно сработать».</p></details>
-  <details><summary>Очищение — постоянный процесс</summary>
-    <p>Это не разовая техника, а фон жизни. Памяти много, поэтому очищать можно всё время: в очереди, на совещании, перед звонком, читая почту. Короткие циклы в течение дня важнее одной длинной сессии.</p></details>
-  <details><summary>Что значит каждая фраза</summary>
-    <ul>
-      <li><b>Мне очень жаль</b> — признание: во мне есть что-то, что создало эту ситуацию.</li>
-      <li><b>Пожалуйста, прости меня</b> — просьба об освобождении, без самобичевания.</li>
-      <li><b>Спасибо тебе</b> — благодарность за очищение, доверие процессу.</li>
-      <li><b>Я люблю тебя</b> — самая сильная фраза, возвращает к Источнику.</li>
-    </ul></details>
-  <details><summary>Применение на работе</summary>
-    <ul>
-      <li>Перед сложной встречей — 2–3 минуты очищения ситуации и участников.</li>
-      <li>Получили неприятное письмо — сначала «спасибо, я люблю тебя» себе, потом ответ.</li>
-      <li>Готовите материал — очистите задачу и тех, кто его будет читать.</li>
-      <li>Конфликт в команде — очищайте не человека, а свою реакцию на него.</li>
-    </ul></details>
-  <details><summary>Дополнительные инструменты</summary>
-    <p>В традиции доктора Хью Лина есть и другие «инструменты очищения», которые можно добавлять по вдохновению: дыхание ХА, мысленное «ластик»-касание к проблеме, вода «синее солнце» (вода, постоявшая на солнце в синей стеклянной бутылке), простое «Спасибо» в ответ на любую мысль. Используйте то, что откликается.</p></details>
-  <details><summary>Если «не получается»</summary>
-    <p>Сомнение, скука, раздражение на практику — тоже память. Её очищают теми же фразами. Делать механически — нормально: регулярность важнее ощущений.</p></details>
-</section>
-
-<!-- ========== НАСТРОЙКИ ========== -->
-<section class="tab" id="t-set">
-  <h2>Настройки</h2>
-  <div class="card">
-    <h3>Напоминания</h3>
-    <p class="muted small" style="margin-top:0">Надёжные офлайн-напоминания — через календарь телефона: импортируйте файл <b>hooponopono-reminders.ics</b> (уведомления от самого приложения iPhone без сервера не поддерживает) (утро, обед, вечер). Пока это окно открыто, приложение тоже мягко напомнит в выбранные часы.</p>
-    <label class="muted small" for="remTimes">Время (через запятую)</label>
-    <input id="remTimes" value="08:00, 13:00, 21:30">
-    <div class="row" style="margin-top:8px"><button class="ghost grow" id="saveRem">Сохранить</button></div>
-  </div>
-  <div class="card">
-    <h3>Резервная копия</h3>
-    <p class="muted small" style="margin-top:0">Данные хранятся только на этом устройстве, в этом браузере. Периодически делайте копию.</p>
-    <div class="row">
-      <button class="ghost grow" id="exportBtn">Сохранить копию</button>
-      <label class="btn grow" style="text-align:center;border:1px solid var(--line)">Восстановить<input type="file" id="importFile" accept=".json,application/json" hidden></label>
-    </div>
-  </div>
-  <div class="card">
-    <h3>Сброс</h3>
-    <button class="ghost" id="resetBtn">Очистить все данные</button>
-  </div>
-  <p class="muted small">По мотивам метода Хоопонопоно в изложении Джо Витале и доктора Ихалеакала Хью Лина. Тексты — краткий пересказ, не цитаты из книг.</p>
-</section>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
 </main>
 
-<nav id="nav">
-  <button data-t="t-today" class="on"><span>☀︎</span>Сегодня</button>
-  <button data-t="t-clean"><span>♡</span>Очищение</button>
-  <button data-t="t-breath"><span>◎</span>Дыхание</button>
-  <button data-t="t-journal"><span>✎</span>Дневник</button>
-  <button data-t="t-learn"><span>❖</span>Суть</button>
-  <button data-t="t-set"><span>⚙︎</span></button>
-</nav>
-<div class="toast" id="toast"></div>
-
 <script>
-(function(){
-'use strict';
-var KEY='hoopo_v1';
-var mem={};
-function load(){try{var s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return mem.d||null}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){mem.d=D}}
-var D=load()||{days:{},journal:[],total:0,rem:'08:00, 13:00, 21:30'};
-D.days=D.days||{};D.journal=D.journal||[];D.total=D.total||0;
-
-function $(id){return document.getElementById(id)}
-function pad(n){return (n<10?'0':'')+n}
-function dkey(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function day(k){k=k||dkey();if(!D.days[k])D.days[k]={c:0,chk:{}};return D.days[k]}
-function toast(t){var el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},1800)}
-function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-
-/* date header */
-var months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-var wd=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
-var now=new Date();
-$('today').textContent=wd[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()];
-
-/* nav */
-var navBtns=document.querySelectorAll('nav button');
-function show(id){
-  document.querySelectorAll('section.tab').forEach(function(s){s.classList.toggle('on',s.id===id)});
-  navBtns.forEach(function(b){b.classList.toggle('on',b.dataset.t===id)});
-  window.scrollTo(0,0);
-  if(id==='t-today')renderToday();
-  if(id==='t-journal')renderJournal();
-}
-navBtns.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.t)})});
-
-/* thoughts (own wording) */
-var thoughts=[
- 'Всё, что я вижу в другом, — во мне. И это можно очистить.',
- 'Не нужно понимать, что именно стирается. Достаточно очищать.',
- 'Сначала очищение, потом действие.',
- 'Проблема — не враг, а возможность освободить память.',
- 'Отпусти ожидание результата — и оставь место вдохновению.',
- '«Я люблю тебя» — уже достаточно.',
- 'Очищай не человека, а то, что во мне на него откликается.',
- 'Ноль — это не пустота, а свобода от старых программ.',
- 'Благодари даже за то, что раздражает: это показывает, что очищать.',
- 'Мир меняется, когда меняется то, что во мне.',
- 'Сомнение — тоже память. Спасибо, я люблю тебя.',
- 'Каждый момент — новая возможность вернуться к нулю.'
+// t — название, o — оригинал, y — год, k — film|series, min — длительность (для сериалов — суммарно),
+// ev — сколько вечеров (1 / 2 / 3 / 'ep' = одна серия = один вечер), g — жанры, m — настроения, d — описание
+window.KINO = [
+// ---------- ТРИЛЛЕРЫ И ДЕТЕКТИВЫ ----------
+{t:"Исчезнувшая",o:"Gone Girl",y:2014,k:"film",min:149,ev:1,g:["Триллер","Детектив"],m:["На краю дивана","Обсудить после"],d:"В годовщину свадьбы пропадает жена, и все подозрения падают на мужа. Финчер раскручивает историю так, что к середине вы перестаёте понимать, кому верить. Идеально для пары — спорить после титров гарантировано."},
+{t:"Достать ножи",o:"Knives Out",y:2019,k:"film",min:130,ev:1,g:["Детектив","Комедия"],m:["На краю дивана","Легко и весело"],d:"Знаменитый автор детективов найден мёртвым после семейного праздника, а в доме — сплошь родственники с мотивами. Классический «кто убил» с юмором, отличным актёрским составом и честными подсказками."},
+{t:"Достать ножи: Стеклянная луковица",o:"Glass Onion",y:2022,k:"film",min:139,ev:1,g:["Детектив","Комедия"],m:["Легко и весело","На краю дивана"],d:"Тот же сыщик на частном греческом острове миллиардера, где игра в убийство превращается в настоящее. Ярче и смешнее первой части, смотреть можно отдельно."},
+{t:"Пленницы",o:"Prisoners",y:2013,k:"film",min:153,ev:1,g:["Триллер","Детектив","Драма"],m:["На краю дивана","Мрачно"],d:"Пропадают две девочки, отец одной из них решает действовать сам, пока детектив ищет по правилам. Тяжёлый, очень плотный триллер Вильнёва — держит до последней секунды."},
+{t:"Остров проклятых",o:"Shutter Island",y:2010,k:"film",min:138,ev:1,g:["Триллер","Мистика"],m:["На краю дивана","Обсудить после"],d:"Два маршала приезжают на остров с клиникой для преступников, чтобы найти сбежавшую пациентку. Атмосфера сгущается, а финал заставляет пересобрать весь фильм в голове."},
+{t:"Невидимый гость",o:"Contratiempo",y:2016,k:"film",min:106,ev:1,g:["Триллер","Детектив"],m:["На краю дивана"],d:"Бизнесмен, обвинённый в убийстве, за одну ночь должен выстроить с адвокатом безупречную версию защиты. Испанский триллер-головоломка с поворотом за поворотом, без единой провисающей минуты."},
+{t:"Тело",o:"El cuerpo",y:2012,k:"film",min:108,ev:1,g:["Триллер","Детектив"],m:["На краю дивана"],d:"Из морга исчезает тело влиятельной женщины, а её мужа вызывают на допрос. Одна ночь, одно здание, нарастающее напряжение — от того же режиссёра, что и «Невидимый гость»."},
+{t:"Секрет в их глазах",o:"El secreto en sus ojos",y:2009,k:"film",min:129,ev:1,g:["Детектив","Драма","Мелодрама"],m:["Обсудить после","Романтично"],d:"Бывший следователь пишет роман о старом деле об убийстве, которое не отпускает его 25 лет, — и о женщине, которую он так и не решился полюбить. Аргентинский «Оскар», детектив и история любви в одном."},
+{t:"Отступники",o:"The Departed",y:2006,k:"film",min:151,ev:1,g:["Триллер","Криминал"],m:["На краю дивана"],d:"Полицейский под прикрытием внедрён в банду, а человек банды — в полицию. Оба ищут «крота», то есть друг друга. Скорсезе, ДиКаприо, Деймон, Николсон — плотно и жёстко."},
+{t:"Убийца",o:"Sicario",y:2015,k:"film",min:121,ev:1,g:["Триллер","Боевик","Криминал"],m:["На краю дивана","Мрачно"],d:"Агент ФБР попадает в спецгруппу, которая воюет с картелями на границе с Мексикой по своим правилам. Одна из самых напряжённых сцен на дороге в истории кино."},
+{t:"Стрингер",o:"Nightcrawler",y:2014,k:"film",min:117,ev:1,g:["Триллер","Драма"],m:["Мрачно","Обсудить после"],d:"Ночной Лос-Анджелес, одержимый успехом одиночка снимает аварии и преступления для телевидения и всё дальше переходит черту. Джейк Джилленхол пугает по-настоящему."},
+{t:"Анатомия падения",o:"Anatomie d'une chute",y:2023,k:"film",min:151,ev:1,g:["Детектив","Драма"],m:["Обсудить после"],d:"Мужчина погибает, упав из окна шале; под подозрением — жена. Судебная драма, где разбирают не только улики, но и сам брак. Идеальный повод для долгого разговора вдвоём."},
+{t:"Конклав",o:"Conclave",y:2024,k:"film",min:120,ev:1,g:["Триллер","Драма"],m:["На краю дивана","Обсудить после"],d:"Кардиналы запираются в Ватикане, чтобы выбрать нового папу, и с каждым туром голосования вскрываются чужие тайны. Тихий, но очень цепкий политический триллер."},
+{t:"Счастливое число Слевина",o:"Lucky Number Slevin",y:2006,k:"film",min:110,ev:1,g:["Криминал","Триллер","Комедия"],m:["На краю дивана","Легко и весело"],d:"Парня принимают за должника сразу двух враждующих боссов мафии. Остроумно, стильно и с хитро собранным сюжетом."},
+{t:"Прочь",o:"Get Out",y:2017,k:"film",min:104,ev:1,g:["Ужасы","Триллер"],m:["На краю дивана","Обсудить после"],d:"Парень едет знакомиться с родителями девушки, и в идеальном доме всё кажется чуть-чуть не так. Умный жанровый фильм — страшно, но без лишней крови."},
+{t:"Тихое место",o:"A Quiet Place",y:2018,k:"film",min:90,ev:1,g:["Ужасы","Фантастика"],m:["На краю дивана"],d:"Семья выживает в мире, где любой звук привлекает хищников. Полтора часа почти в тишине — затаите дыхание вместе."},
+{t:"Текст",o:"Текст",y:2019,k:"film",min:132,ev:1,g:["Триллер","Драма"],m:["Мрачно","Обсудить после"],d:"Вышедший после несправедливого срока парень завладевает телефоном своего обидчика — и начинает жить его жизнью через переписку. Один из самых сильных российских фильмов последних лет."},
+// ---------- ФАНТАСТИКА И ЭКШЕН ----------
+{t:"Начало",o:"Inception",y:2010,k:"film",min:148,ev:1,g:["Фантастика","Боевик"],m:["На краю дивана","Обсудить после"],d:"Команда проникает в сны, чтобы внедрить человеку идею. Ограбление в нескольких слоях реальности — красиво, умно и с открытым финалом для споров."},
+{t:"Престиж",o:"The Prestige",y:2006,k:"film",min:130,ev:1,g:["Драма","Мистика","Триллер"],m:["На краю дивана","Обсудить после"],d:"Два фокусника XIX века соперничают до одержимости. Нолан строит фильм как трюк — и разгадка того стоит."},
+{t:"Грань будущего",o:"Edge of Tomorrow",y:2014,k:"film",min:113,ev:1,g:["Фантастика","Боевик"],m:["На краю дивана","Легко и весело"],d:"Офицер застревает в одном дне войны с инопланетянами и проживает его снова и снова, каждый раз чуть лучше. Динамично, с юмором и отличной Эмили Блант."},
+{t:"Исходный код",o:"Source Code",y:2011,k:"film",min:93,ev:1,g:["Фантастика","Триллер"],m:["На краю дивана"],d:"Военный раз за разом проживает последние восемь минут перед взрывом поезда, чтобы найти бомбу. Короткий, умный и очень бодрый."},
+{t:"Прибытие",o:"Arrival",y:2016,k:"film",min:116,ev:1,g:["Фантастика","Драма"],m:["Обсудить после","Вдохновляюще"],d:"Лингвиста зовут понять язык пришельцев, прилетевших на Землю. Тихая, умная фантастика, после которой хочется помолчать вместе."},
+{t:"Марсианин",o:"The Martian",y:2015,k:"film",min:144,ev:1,g:["Фантастика","Приключения"],m:["Вдохновляюще","Легко и весело"],d:"Астронавта забывают на Марсе, и он решает выжить с помощью науки и чувства юмора. Оптимистичное кино — поднимает настроение."},
+{t:"Гравитация",o:"Gravity",y:2013,k:"film",min:91,ev:1,g:["Фантастика","Триллер"],m:["На краю дивана"],d:"Два астронавта остаются в открытом космосе после аварии. Полтора часа чистого напряжения — лучше на большом экране и со звуком."},
+{t:"Интерстеллар",o:"Interstellar",y:2014,k:"film",min:169,ev:1,g:["Фантастика","Драма"],m:["Вдохновляюще","Обсудить после"],d:"Земля умирает, и группа летит сквозь червоточину искать новый дом. Длинный, но в нём космос, время и любовь отца к дочери. Начинайте пораньше."},
+{t:"Безумный Макс: Дорога ярости",o:"Mad Max: Fury Road",y:2015,k:"film",min:120,ev:1,g:["Боевик","Фантастика"],m:["На краю дивана"],d:"Двухчасовая погоня по пустыне без передышки. Если хочется адреналина — лучше не найти."},
+{t:"Топ Ган: Мэверик",o:"Top Gun: Maverick",y:2022,k:"film",min:131,ev:1,g:["Боевик","Драма"],m:["Вдохновляюще","На краю дивана"],d:"Легендарный пилот готовит молодых асов к почти невыполнимой миссии. Настоящие полёты, драйв и тёплая ностальгия; первую часть смотреть не обязательно."},
+{t:"Миссия невыполнима: Последствия",o:"Mission: Impossible – Fallout",y:2018,k:"film",min:147,ev:1,g:["Боевик","Шпионский"],m:["На краю дивана","Легко и весело"],d:"Итан Хант пытается исправить провал операции и не дать ядерным зарядам попасть не в те руки. Лучшая часть франшизы, трюки — без компьютерной графики."},
+{t:"Джон Уик",o:"John Wick",y:2014,k:"film",min:101,ev:1,g:["Боевик","Криминал"],m:["На краю дивана"],d:"Отошедший от дел киллер возвращается, когда у него отнимают последнее, что ему дорого. Простой сюжет и очень красивые драки."},
+{t:"Гнев человеческий",o:"Wrath of Man",y:2021,k:"film",min:119,ev:1,g:["Боевик","Криминал","Триллер"],m:["На краю дивана","Мрачно"],d:"Молчаливый новичок устраивается в инкассаторскую компанию — и явно пришёл туда не за зарплатой. Гай Ричи в серьёзном, холодном режиме."},
+{t:"Бесславные ублюдки",o:"Inglourious Basterds",y:2009,k:"film",min:153,ev:1,g:["Боевик","Драма","Комедия"],m:["На краю дивана"],d:"Отряд мстителей и девушка-киномеханик независимо друг от друга готовят удар по верхушке Третьего рейха. Тарантино: длинные диалоги, от которых невозможно оторваться."},
+// ---------- ОГРАБЛЕНИЯ И АВАНТЮРЫ ----------
+{t:"Поймай меня, если сможешь",o:"Catch Me If You Can",y:2002,k:"film",min:141,ev:1,g:["Криминал","Биография","Комедия"],m:["Легко и весело","Вдохновляюще"],d:"Реальная история юного афериста, который выдавал себя за пилота, врача и юриста, и агента ФБР, гонявшегося за ним годами. Лёгкий, обаятельный Спилберг."},
+{t:"Одиннадцать друзей Оушена",o:"Ocean's Eleven",y:2001,k:"film",min:116,ev:1,g:["Криминал","Комедия"],m:["Легко и весело"],d:"Обаятельная команда грабит три казино Лас-Вегаса за одну ночь. Стильно, весело и без лишней жестокости."},
+{t:"Ограбление по-итальянски",o:"The Italian Job",y:2003,k:"film",min:111,ev:1,g:["Криминал","Боевик"],m:["Легко и весело","На краю дивана"],d:"Команда мстит предателю, укравшему их золото, с помощью трёх Mini Cooper и пробок Лос-Анджелеса. Динамичный и лёгкий фильм."},
+{t:"Мистер и миссис Смит",o:"Mr. & Mrs. Smith",y:2005,k:"film",min:120,ev:1,g:["Боевик","Комедия","Мелодрама"],m:["Легко и весело","Романтично"],d:"Скучающие супруги узнают, что оба — наёмные убийцы и что их наняли друг против друга. Почти обязательный фильм для вечера вдвоём."},
+// ---------- ДРАМЫ, БИОГРАФИИ, ВДОХНОВЛЯЮЩЕЕ ----------
+{t:"Паразиты",o:"Gisaengchung",y:2019,k:"film",min:132,ev:1,g:["Триллер","Драма","Комедия"],m:["На краю дивана","Обсудить после"],d:"Бедная семья по одному устраивается работать к богатым — и всё идёт слишком хорошо. Начинается как комедия, заканчивается так, что не забудешь. «Оскар» за лучший фильм."},
+{t:"Одержимость",o:"Whiplash",y:2014,k:"film",min:106,ev:1,g:["Драма"],m:["На краю дивана","Обсудить после"],d:"Молодой барабанщик попадает к жестокому преподавателю, который выжимает из учеников всё. Музыкальный фильм, который ощущается как триллер."},
+{t:"Форд против Феррари",o:"Ford v Ferrari",y:2019,k:"film",min:152,ev:1,g:["Биография","Драма","Спорт"],m:["Вдохновляюще","На краю дивана"],d:"Конструктор и гонщик-бунтарь строят машину, чтобы обыграть Ferrari в Ле-Мане. Про дружбу, упрямство и скорость; интересно даже тем, кто не любит гонки."},
+{t:"1+1",o:"Intouchables",y:2011,k:"film",min:112,ev:1,g:["Драма","Комедия"],m:["Вдохновляюще","Уютно"],d:"Парализованный аристократ нанимает в помощники парня из пригорода — без опыта, но с огромной энергией. Тёплый, смешной и очень человечный."},
+{t:"Зелёная книга",o:"Green Book",y:2018,k:"film",min:130,ev:1,g:["Драма","Комедия","Биография"],m:["Уютно","Вдохновляюще"],d:"Грубоватый вышибала везёт утончённого пианиста в турне по югу США 60-х. Роуд-муви о дружбе двух очень разных людей."},
+{t:"Невероятная жизнь Уолтера Митти",o:"The Secret Life of Walter Mitty",y:2013,k:"film",min:114,ev:1,g:["Приключения","Комедия","Драма"],m:["Вдохновляюще","Уютно"],d:"Скромный сотрудник журнала, который живёт в мечтах, отправляется в настоящее путешествие за пропавшим снимком. Красивые пейзажи и желание собрать чемодан."},
+{t:"Легенда №17",o:"Легенда №17",y:2013,k:"film",min:134,ev:1,g:["Спорт","Биография","Драма"],m:["Вдохновляюще"],d:"Путь Валерия Харламова — от травмы до легендарной серии против канадцев в 1972 году. Хоккейные сцены сняты так, что болеешь, даже зная исход."},
+{t:"Движение вверх",o:"Движение вверх",y:2017,k:"film",min:133,ev:1,g:["Спорт","Драма"],m:["Вдохновляюще","На краю дивана"],d:"Сборная СССР по баскетболу готовится к финалу Олимпиады 1972 года против непобедимых американцев. Последние три секунды — как отдельный фильм."},
+{t:"Аритмия",o:"Аритмия",y:2017,k:"film",min:116,ev:1,g:["Драма","Мелодрама"],m:["Обсудить после"],d:"Врач скорой помощи спасает чужие жизни, а его собственный брак разваливается. Очень честное кино про работу и отношения."},
+{t:"Брат",o:"Брат",y:1997,k:"film",min:99,ev:1,g:["Криминал","Драма"],m:["Мрачно"],d:"Вернувшийся из армии Данила едет в Петербург к старшему брату и оказывается в криминальном мире 90-х. Культовая классика — пересмотреть вдвоём."},
+// ---------- РОМАНТИКА И КОМЕДИИ ----------
+{t:"Ла-Ла Ленд",o:"La La Land",y:2016,k:"film",min:128,ev:1,g:["Мелодрама","Мюзикл"],m:["Романтично","Обсудить после"],d:"Джазовый пианист и начинающая актриса влюбляются в Лос-Анджелесе, но мечты тянут их в разные стороны. Красиво, музыкально и с горько-сладким финалом."},
+{t:"Бойфренд из будущего",o:"About Time",y:2013,k:"film",min:123,ev:1,g:["Мелодрама","Комедия","Фантастика"],m:["Романтично","Уютно"],d:"Парень узнаёт, что мужчины в его семье умеют возвращаться в прошлое, и использует это, чтобы добиться любимой. Самый тёплый фильм о любви и ценности обычного дня."},
+{t:"Перед рассветом",o:"Before Sunrise",y:1995,k:"film",min:101,ev:1,g:["Мелодрама"],m:["Романтично","Обсудить после"],d:"Американец и француженка знакомятся в поезде и проводят одну ночь, гуляя по Вене. Только разговоры — и невозможно оторваться."},
+{t:"Вечное сияние чистого разума",o:"Eternal Sunshine of the Spotless Mind",y:2004,k:"film",min:108,ev:1,g:["Мелодрама","Фантастика","Драма"],m:["Романтично","Обсудить после"],d:"После расставания пара стирает воспоминания друг о друге, но в процессе он понимает, что не хочет её забывать. Необычный и очень трогательный фильм о любви."},
+{t:"Дьявол носит Prada",o:"The Devil Wears Prada",y:2006,k:"film",min:109,ev:1,g:["Комедия","Драма"],m:["Легко и весело","Уютно"],d:"Выпускница устраивается ассистенткой к безжалостному главреду модного журнала. Остроумно, стильно и узнаваемо для всех, у кого был трудный начальник."},
+{t:"Мальчишник в Вегасе",o:"The Hangover",y:2009,k:"film",min:100,ev:1,g:["Комедия"],m:["Легко и весело"],d:"Друзья просыпаются после бурной ночи в Вегасе без жениха и без воспоминаний. Комедия-расследование, чтобы просто посмеяться."},
+{t:"Холоп",o:"Холоп",y:2019,k:"film",min:109,ev:1,g:["Комедия"],m:["Легко и весело","Уютно"],d:"Избалованного мажора «перевоспитывают», убедив, что он проснулся крепостным в XIX веке. Смешная и неожиданно добрая комедия."},
+{t:"Иван Васильевич меняет профессию",o:"Иван Васильевич меняет профессию",y:1973,k:"film",min:88,ev:1,g:["Комедия","Фантастика"],m:["Легко и весело","Уютно"],d:"Машина времени меняет местами Ивана Грозного и управдома Буншу. Классика, которую можно пересматривать бесконечно."},
+// ---------- СЕРИАЛЫ ----------
+{t:"Шерлок",o:"Sherlock",y:2010,k:"series",min:90,ev:"ep",g:["Детектив","Триллер"],m:["На краю дивана","Легко и весело"],d:"Шерлок Холмс и доктор Ватсон в современном Лондоне. Каждая серия длится полтора часа и рассказывает законченное дело — идеальный формат «серия на вечер»."},
+{t:"Чёрное зеркало",o:"Black Mirror",y:2011,k:"series",min:60,ev:"ep",g:["Фантастика","Триллер","Драма"],m:["Обсудить после","Мрачно"],d:"Антология: каждая серия — отдельная история о том, как технологии меняют людей. Начните с «Сан-Хуниперо» (романтично) или «Нырок»."},
+{t:"Флибэг (1 сезон)",o:"Fleabag",y:2016,k:"series",min:150,ev:1,g:["Комедия","Драма"],m:["Легко и весело","Обсудить после"],d:"Шесть серий по 25 минут о дерзкой лондонской девушке, которая шутит, чтобы не чувствовать боль. Весь сезон — за один вечер."},
+{t:"Переходный возраст",o:"Adolescence",y:2025,k:"series",min:240,ev:1,g:["Драма","Криминал"],m:["Мрачно","Обсудить после"],d:"13-летнего подростка арестовывают по подозрению в убийстве одноклассницы. Четыре серии, каждая снята одним кадром без склеек. Тяжело, но невозможно оторваться."},
+{t:"Оленёнок",o:"Baby Reindeer",y:2024,k:"series",min:240,ev:2,g:["Драма","Триллер"],m:["Мрачно","Обсудить после"],d:"Комик проявляет доброту к одинокой женщине, и она начинает его преследовать. Основано на реальной истории автора. Семь коротких серий, местами очень жёстко."},
+{t:"Медведь (1 сезон)",o:"The Bear",y:2022,k:"series",min:240,ev:2,g:["Драма","Комедия"],m:["На краю дивана"],d:"Шеф-повар из лучшего ресторана мира возвращается спасать семейную закусочную в Чикаго. Короткие серии с ощущением постоянного аврала на кухне."},
+{t:"Ход королевы",o:"The Queen's Gambit",y:2020,k:"series",min:395,ev:3,g:["Драма"],m:["Вдохновляюще","На краю дивана"],d:"Сирота-вундеркинд пробивается в мир больших шахмат 60-х. Шахматные партии смотрятся как спортивные поединки — правила знать не нужно. Семь серий."},
+{t:"Чернобыль",o:"Chernobyl",y:2019,k:"series",min:330,ev:3,g:["Драма","История"],m:["Мрачно","Обсудить после"],d:"Как случилась авария на ЧАЭС и какой ценой ликвидировали её последствия. Пять серий, одна из лучших мини-серий в истории."},
+{t:"Слово пацана. Кровь на асфальте",o:"Слово пацана",y:2023,k:"series",min:400,ev:3,g:["Криминал","Драма"],m:["Мрачно","На краю дивана"],d:"Казань конца 80-х: школьник попадает в уличную группировку. Сериал, о котором говорила вся страна; восемь серий."},
+{t:"Ночной администратор",o:"The Night Manager",y:2016,k:"series",min:360,ev:3,g:["Шпионский","Триллер"],m:["На краю дивана","Романтично"],d:"Бывший солдат, а теперь администратор отеля, внедряется в окружение торговца оружием. Красивый шпионский роман по Ле Карре; шесть серий."},
+{t:"Настоящий детектив (1 сезон)",o:"True Detective",y:2014,k:"series",min:460,ev:3,g:["Детектив","Драма"],m:["Мрачно","Обсудить после"],d:"Два детектива расследуют ритуальное убийство в Луизиане — и спустя 17 лет вспоминают это дело на допросе. Макконахи и Харрельсон в лучшей форме; восемь серий."},
+{t:"Мейр из Исттауна",o:"Mare of Easttown",y:2021,k:"series",min:420,ev:3,g:["Детектив","Драма"],m:["На краю дивана","Обсудить после"],d:"Уставший детектив маленького городка расследует убийство девушки, параллельно разбираясь с собственной жизнью. Кейт Уинслет великолепна; семь серий."},
+{t:"Нормальные люди",o:"Normal People",y:2020,k:"series",min:360,ev:3,g:["Мелодрама","Драма"],m:["Романтично","Обсудить после"],d:"Двое из ирландского городка снова и снова сходятся и расходятся со школы до университета. Очень нежная и честная история любви; двенадцать серий по полчаса."},
+{t:"Белый лотос (1 сезон)",o:"The White Lotus",y:2021,k:"series",min:360,ev:3,g:["Комедия","Драма","Детектив"],m:["Обсудить после","Легко и весело"],d:"Неделя в роскошном отеле на Гавайях глазами гостей и персонала, и уже в первой сцене ясно, что кто-то не вернётся домой. Сатира с интригой; шесть серий."},
+{t:"Большая маленькая ложь (1 сезон)",o:"Big Little Lies",y:2017,k:"series",min:420,ev:3,g:["Детектив","Драма"],m:["На краю дивана","Обсудить после"],d:"Благополучные мамы из Монтерея и одна смерть на школьном вечере. Николь Кидман, Риз Уизерспун, тайны за идеальными фасадами; семь серий."},
+{t:"Пищеблок",o:"Пищеблок",y:2021,k:"series",min:400,ev:3,g:["Мистика","Драма"],m:["На краю дивана","Уютно"],d:"Пионерлагерь 1980 года, и среди вожатых и детей завелись вампиры. Ностальгия по СССР и лёгкая жуть; по роману Алексея Иванова."}
 ];
 
-/* today */
-function streak(){
-  var n=0,d=new Date();
-  if(!active(dkey(d)))d.setDate(d.getDate()-1);
-  while(active(dkey(d))){n++;d.setDate(d.getDate()-1)}
-  return n;
-}
-function active(k){var x=D.days[k];if(!x)return false;if(x.c>0)return true;for(var i in x.chk)if(x.chk[i])return true;return false}
-function level(k){var x=D.days[k];if(!x)return 0;var s=x.c;for(var i in x.chk)if(x.chk[i])s+=2;return s===0?0:s<5?1:s<12?2:3}
-function renderToday(){
-  var t=day();
-  document.querySelectorAll('#checklist input').forEach(function(cb){cb.checked=!!t.chk[cb.dataset.k]});
-  $('statsCard').hidden=false;$('thoughtCard').hidden=false;
-  $('streak').textContent=streak();
-  $('cyclesToday').textContent=t.c;
-  $('cyclesTotal').textContent=D.total;
-  var start=new Date();start.setDate(start.getDate()-27);
-  var html='';
-  for(var i=0;i<28;i++){var d=new Date(start);d.setDate(start.getDate()+i);var k=dkey(d);
-    html+='<div class="l'+level(k)+(k===dkey()?' today':'')+'">'+d.getDate()+'</div>'}
-  $('cal').innerHTML=html;
-  var idx=Math.floor((new Date()-new Date(2026,0,1))/864e5)%thoughts.length;
-  $('thought').textContent=thoughts[(idx+thoughts.length)%thoughts.length];
-}
-document.querySelectorAll('#checklist input').forEach(function(cb){
-  cb.addEventListener('change',function(){day().chk[cb.dataset.k]=cb.checked;save();renderToday();if(cb.checked){buzz(20);toast('Спасибо ♡')}});
-});
+(function(){
+'use strict';
+var K='kino_v1',S;
+try{S=JSON.parse(localStorage.getItem(K))||{}}catch(e){S={}}
+S.seen=S.seen||{};S.want=S.want||{};
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+var data=window.KINO.map(function(x,i){x.id=x.o+'|'+x.y;return x});
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
-/* cleaning */
-var P=['Мне очень жаль','Пожалуйста, прости меня','Спасибо тебе','Я люблю тебя'];
-var pi=-1,sess=0,auto=null;
-var dots=$('dots').children;
-function step(){
-  pi=(pi+1)%4;
-  var el=$('phraseText');el.style.opacity=0;
-  setTimeout(function(){el.textContent=P[pi];el.style.opacity=1},150);
-  for(var i=0;i<4;i++)dots[i].classList.toggle('on',i<=pi);
-  if(pi===3){sess++;var t=day();t.c++;D.total++;save();$('sessCycles').textContent=sess;$('sessToday').textContent=t.c;buzz([30,60,30])}
-  else buzz(10);
-  $('phraseHint').textContent='';
-}
-$('phraseCard').addEventListener('click',function(){if(auto)return;step()});
-$('autoBtn').addEventListener('click',function(){
-  if(auto){clearInterval(auto);auto=null;this.textContent='▶ Автоповтор';return}
-  step();auto=setInterval(step,4000);this.textContent='❚❚ Пауза';
-});
-$('finishBtn').addEventListener('click',function(){
-  if(auto){clearInterval(auto);auto=null;$('autoBtn').textContent='▶ Автоповтор'}
-  var tg=$('target').value.trim();
-  if(tg){
-    var ex=D.journal.find(function(j){return !j.done&&j.text===tg});
-    if(ex){ex.n=(ex.n||0)+sess;ex.last=Date.now()}
-    else D.journal.unshift({id:Date.now(),date:dkey(),text:tg,kind:'Сессия',n:sess,done:false,last:Date.now()});
-  }
-  save();toast(sess?('Очищено кругов: '+sess):'Спасибо');
-  sess=0;pi=-1;$('sessCycles').textContent=0;$('target').value='';
-  $('phraseText').textContent='Нажмите, чтобы начать';for(var i=0;i<4;i++)dots[i].classList.remove('on');
-});
-$('sessToday').textContent=day().c;
+var MOODS=['На краю дивана','Легко и весело','Романтично','Обсудить после','Вдохновляюще','Мрачно','Уютно'];
+var MI={'На краю дивана':'😱','Легко и весело':'😄','Романтично':'❤️','Обсудить после':'💬','Вдохновляюще':'✨','Мрачно':'🌑','Уютно':'🛋️'};
+var genres={};data.forEach(function(x){x.g.forEach(function(g){genres[g]=(genres[g]||0)+1})});
+var GEN=Object.keys(genres).sort(function(a,b){return genres[b]-genres[a]});
+var FORMATS=[['all','Всё'],['short','Фильм до 2 ч'],['film','Любой фильм'],['one','Сериал за 1 вечер'],['ep','Серия = вечер'],['multi','Сериал на 2–3 вечера']];
+var LISTS=[['all','Все'],['want','Хотим посмотреть'],['seen','Смотрели']];
 
-/* breath */
-var bTimer=null;
-$('breathBtn').addEventListener('click',function(){
-  var btn=this;
-  if(bTimer){clearInterval(bTimer);bTimer=null;btn.textContent='Начать';$('breathLabel').textContent='Остановлено';setCircle(.55);return}
-  var rounds=+$('breathRounds').value,sec=+$('breathSec').value;
-  $('breathTotal').textContent=rounds;
-  var phases=[['Вдох',1],['Задержка',1],['Выдох',.55],['Задержка',.55]];
-  var r=1,ph=0,c=sec;
-  btn.textContent='Стоп';
-  function paint(){$('breathRound').textContent=r;$('breathLabel').textContent=phases[ph][0];$('breathCount').textContent=c}
-  $('breathCircle').style.transitionDuration=sec+'s';
-  setCircle(phases[0][1]);paint();
-  bTimer=setInterval(function(){
-    c--;
-    if(c<=0){
-      ph++;
-      if(ph>3){ph=0;r++;
-        if(r>rounds){clearInterval(bTimer);bTimer=null;btn.textContent='Начать';$('breathLabel').textContent='Готово. Спасибо ♡';$('breathCount').textContent='✓';
-          var t=day();t.chk.breath=true;save();buzz([40,80,40]);return}
-      }
-      c=sec;setCircle(phases[ph][1]);buzz(15);
-    }
-    paint();
-  },1000);
-});
-function setCircle(s){$('breathCircle').style.transform='scale('+s+')'}
+var F={mood:{},genre:{},format:'all',list:'all',q:''};
 
-/* journal */
-$('jAdd').addEventListener('click',function(){
-  var t=$('jText').value.trim();if(!t){toast('Напишите, что всплыло');return}
-  D.journal.unshift({id:Date.now(),date:dkey(),text:t,kind:$('jKind').value,n:0,done:false});
-  day().chk.person=true;save();$('jText').value='';renderJournal();toast('Записано');
-});
-$('jFilter').addEventListener('change',renderJournal);
-function renderJournal(){
-  var f=$('jFilter').value;
-  var list=D.journal.filter(function(j){return f==='all'||(f==='open'?!j.done:j.done)});
-  if(!list.length){$('jList').innerHTML='<p class="muted small">Пока пусто.</p>';return}
-  $('jList').innerHTML=list.map(function(j){
-    return '<div class="entry'+(j.done?' done':'')+'" data-id="'+j.id+'">'+
-      '<div><span class="tag">'+esc(j.kind)+'</span><span class="muted small">'+esc(j.date)+' · очищено кругов: '+(j.n||0)+'</span></div>'+
-      '<div style="margin:4px 0 8px">'+esc(j.text)+'</div>'+
-      '<div class="row"><button class="primary" data-a="clean">Очистить</button>'+
-      '<button class="ghost" data-a="plus">+1 круг</button>'+
-      '<button class="ghost" data-a="done">'+(j.done?'Вернуть':'Отпускаю')+'</button>'+
-      '<button class="ghost" data-a="del">✕</button></div></div>';
+function chips(el,items,isMulti,key){
+  $(el).innerHTML=items.map(function(it){
+    var v=Array.isArray(it)?it[0]:it, l=Array.isArray(it)?it[1]:((MI[it]?MI[it]+' ':'')+it);
+    var on=isMulti?!!F[key][v]:F[key]===v;
+    return '<button class="chip'+(on?' on':'')+'" data-v="'+esc(v)+'">'+esc(l)+'</button>';
   }).join('');
+  $(el).onclick=function(e){var b=e.target.closest('.chip');if(!b)return;var v=b.dataset.v;
+    if(isMulti){if(F[key][v])delete F[key][v];else F[key][v]=1}else F[key]=v;
+    renderChips();render();};
 }
-$('jList').addEventListener('click',function(e){
-  var b=e.target.closest('button');if(!b)return;
-  var id=+b.closest('.entry').dataset.id;var j=D.journal.find(function(x){return x.id===id});if(!j)return;
-  var a=b.dataset.a;
-  if(a==='clean'){$('target').value=j.text;show('t-clean');return}
-  if(a==='plus'){j.n=(j.n||0)+1;day().c++;D.total++;buzz(20)}
-  if(a==='done'){j.done=!j.done;if(j.done)toast('Отпущено. Спасибо ♡')}
-  if(a==='del'){if(!confirm('Удалить запись?'))return;D.journal=D.journal.filter(function(x){return x.id!==id})}
-  save();renderJournal();
+function renderChips(){
+  chips('moods',MOODS,true,'mood');chips('genres',GEN,true,'genre');
+  chips('formats',FORMATS,false,'format');chips('lists',LISTS,false,'list');
+}
+function dur(x){
+  if(x.k==='film'){var h=Math.floor(x.min/60),m=x.min%60;return h+' ч'+(m?' '+m+' мин':'')}
+  if(x.ev==='ep')return 'серия ≈ '+x.min+' мин';
+  var hh=Math.round(x.min/30)/2;return 'сериал · ≈'+String(hh).replace('.',',')+' ч всего';
+}
+function evLabel(x){
+  if(x.k==='film')return 'Фильм на вечер';
+  if(x.ev==='ep')return 'Серия = вечер';
+  if(x.ev===1)return 'Сериал за вечер';
+  return 'На '+x.ev+(x.ev===2?' вечера':' вечера');
+}
+function match(x){
+  var ms=Object.keys(F.mood),gs=Object.keys(F.genre);
+  if(ms.length&&!ms.some(function(m){return x.m.indexOf(m)>=0}))return false;
+  if(gs.length&&!gs.some(function(g){return x.g.indexOf(g)>=0}))return false;
+  var f=F.format;
+  if(f==='short'&&!(x.k==='film'&&x.min<=120))return false;
+  if(f==='film'&&x.k!=='film')return false;
+  if(f==='one'&&!(x.k==='series'&&x.ev===1))return false;
+  if(f==='ep'&&x.ev!=='ep')return false;
+  if(f==='multi'&&!(x.k==='series'&&(x.ev===2||x.ev===3)))return false;
+  if(F.list==='want'&&!S.want[x.id])return false;
+  if(F.list==='seen'&&!S.seen[x.id])return false;
+  if($('hideSeen').checked&&F.list!=='seen'&&S.seen[x.id])return false;
+  if(F.q){var s=(x.t+' '+x.o+' '+x.d+' '+x.g.join(' ')).toLowerCase();if(s.indexOf(F.q)<0)return false}
+  return true;
+}
+var current=[];
+function card(x,hl){
+  var kp='https://www.kinopoisk.ru/index.php?kp_query='+encodeURIComponent(x.t+' '+x.y);
+  return '<div class="card'+(S.seen[x.id]?' seen':'')+(hl?' hl':'')+'" id="c-'+esc(x.id)+'">'+
+   '<h3>'+esc(x.t)+'</h3><div class="orig">'+(x.o!==x.t?esc(x.o)+' · ':'')+x.y+' · '+dur(x)+'</div>'+
+   '<div class="meta"><span class="tag t">'+evLabel(x)+'</span>'+
+   x.m.map(function(m){return '<span class="tag m">'+(MI[m]||'')+' '+esc(m)+'</span>'}).join('')+
+   x.g.map(function(g){return '<span class="tag">'+esc(g)+'</span>'}).join('')+'</div>'+
+   '<p>'+esc(x.d)+'</p>'+
+   '<div class="acts"><button class="want'+(S.want[x.id]?' on':'')+'" data-a="want" data-id="'+esc(x.id)+'">'+(S.want[x.id]?'★ Хотим':'☆ Хотим')+'</button>'+
+   '<button class="'+(S.seen[x.id]?'on':'')+'" data-a="seen" data-id="'+esc(x.id)+'">'+(S.seen[x.id]?'✓ Смотрели':'Смотрели')+'</button>'+
+   '<a href="'+kp+'" target="_blank" rel="noopener">Найти на Кинопоиске ↗</a></div></div>';
+}
+function render(hlId){
+  current=data.filter(match);
+  if(hlId){current.sort(function(a,b){return (b.id===hlId)-(a.id===hlId)})}
+  $('count').textContent='Найдено: '+current.length+' из '+data.length;
+  $('list').innerHTML=current.length?current.map(function(x){return card(x,x.id===hlId)}).join(''):
+    '<div class="empty">Ничего не подошло 🤷‍♂️<br>Снимите часть фильтров.</div>';
+}
+$('list').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-a]');if(!b)return;
+  var id=b.dataset.id,a=b.dataset.a;
+  if(S[a][id])delete S[a][id];else S[a][id]=Date.now();
+  if(a==='seen'&&S.seen[id])delete S.want[id];
+  save();render();
 });
-
-/* reminders while open */
-$('remTimes').value=D.rem;
-$('saveRem').addEventListener('click',function(){D.rem=$('remTimes').value;save();toast('Сохранено')});
-var lastRem='';
-setInterval(function(){
-  var n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());
-  var list=(D.rem||'').split(',').map(function(s){return s.trim()});
-  if(list.indexOf(hm)>=0&&lastRem!==hm){lastRem=hm;buzz([200,100,200]);toast('Время очищения ♡');}
-},20000);
-
-/* backup */
-$('exportBtn').addEventListener('click',function(){
-  var blob=new Blob([JSON.stringify(D,null,1)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hooponopono-backup-'+dkey()+'.json';
-  document.body.appendChild(a);a.click();a.remove();
-});
-$('importFile').addEventListener('change',function(e){
-  var f=e.target.files[0];if(!f)return;var r=new FileReader();
-  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.days)throw 0;D=x;save();renderToday();toast('Восстановлено')}catch(err){toast('Неверный файл')}};
-  r.readAsText(f);
-});
-$('resetBtn').addEventListener('click',function(){
-  if(!confirm('Удалить все данные практики на этом устройстве?'))return;
-  D={days:{},journal:[],total:0,rem:D.rem};save();renderToday();renderJournal();toast('Данные очищены');
-});
-
-renderToday();
+$('q').addEventListener('input',function(){F.q=this.value.trim().toLowerCase();render()});
+$('hideSeen').checked=S.hideSeen!==false;
+$('hideSeen').addEventListener('change',function(){S.hideSeen=this.checked;save();render()});
+$('reset').onclick=function(){F={mood:{},genre:{},format:'all',list:'all',q:''};$('q').value='';renderChips();render();window.scrollTo(0,0)};
+$('random').onclick=function(){
+  var pool=current.filter(function(x){return !S.seen[x.id]});
+  if(!pool.length)pool=current;
+  if(!pool.length)return;
+  var x=pool[Math.floor(Math.random()*pool.length)];
+  render(x.id);
+  var el=document.getElementById('c-'+x.id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+};
+renderChips();render();
 })();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
 </body>
 </html>
