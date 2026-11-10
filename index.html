@@ -69,12 +69,38 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .chip.ok{color:var(--ok)} .chip.bad{color:var(--clash)} .chip.warn{color:var(--warn)}
 .dot{width:9px;height:9px;border-radius:3px;flex:none;display:inline-block}
 .periods{display:grid;gap:8px}
-.prow{display:grid;grid-template-columns:1fr 1fr 74px 36px;gap:8px;align-items:end}
-.prow .days{font-weight:700;font-size:15px;padding-bottom:9px}
+.prow{display:grid;grid-template-columns:1fr auto 36px;gap:8px;align-items:center}
+.pbtn{text-align:left;font:600 15px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;min-width:0}
+.pbtn.empty{color:var(--muted);border-style:dashed}
+.pbtn:hover{border-color:var(--accent)}
+.redtxt{color:var(--clash);font-weight:600}
+.pkwrap{position:fixed;inset:0;z-index:30;background:rgba(8,16,24,.5);display:flex;align-items:flex-end;justify-content:center}
+.pk{background:var(--surface);width:100%;max-width:440px;border-radius:16px 16px 0 0;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:12px;max-height:94vh;overflow:auto}
+@media (min-width:600px){.pkwrap{align-items:center}.pk{border-radius:16px}}
+.pk-hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pk-hd h2{font-size:17px}
+.pk-nav{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:20px;cursor:pointer;flex:none}
+.pk-nav:disabled{opacity:.25;cursor:default}
+.pk-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.pk-dow{text-align:center;font-size:12px;color:var(--muted);font-weight:600;padding:2px 0}
+.pk-d{position:relative;height:44px;border:0;border-radius:9px;background:var(--sunk);color:var(--ink);font:500 15px var(--f-body);cursor:pointer;padding:0}
+.pk-d.we{background:color-mix(in srgb,var(--muted) 16%,var(--surface))}
+.pk-d.red{background:color-mix(in srgb,var(--clash) 24%,var(--surface));color:var(--clash);font-weight:700}
+.pk-d.in{background:color-mix(in srgb,var(--accent) 24%,var(--surface))}
+.pk-d.in.red{color:var(--clash);background:color-mix(in srgb,var(--clash) 30%,var(--surface));box-shadow:inset 0 0 0 2px var(--clash)}
+.pk-d.edge{background:var(--accent);color:var(--accent-ink)}
+.pk-d.edge.red{box-shadow:inset 0 0 0 2px var(--clash)}
+.pk-d i{position:absolute;bottom:4px;left:0;right:0;display:flex;gap:2px;justify-content:center}
+.pk-d i b{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.55}
+.pk-sum{font-size:14px;min-height:42px;display:grid;gap:3px}
+.pk-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.pk-leg span{display:inline-flex;align-items:center;gap:5px}
+.pk-leg u{display:inline-block;width:14px;height:14px;border-radius:4px;text-decoration:none}
+.prow .days{font-weight:700;font-size:15px;white-space:nowrap}
 .prow .days.long{color:var(--accent)}
 .perr{grid-column:1/-1;color:var(--clash);font-size:13px;margin-top:-4px}
 .perr.info{color:var(--muted)}
-@media (max-width:520px){.prow{grid-template-columns:1fr 1fr}.prow .days{padding-bottom:0}}
+
 .addme{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.5fr) auto;gap:8px;align-items:end}
 @media (max-width:560px){.addme{grid-template-columns:1fr}}
 .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
@@ -99,7 +125,6 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .tl-head .tl-track span{flex:none;padding:7px 0 6px 5px;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;border-left:1px solid var(--line);overflow:hidden}
 .tl-head .tl-track span:first-child{border-left:0}
 .ml{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
-.rest{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--clash) 13%,transparent)}
 .hol{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--clash) 32%,transparent)}
 .hlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin:0;padding:0;list-style:none}
 .hlist li{display:flex;gap:10px;align-items:baseline;padding:7px 10px;border-radius:8px;background:color-mix(in srgb,var(--clash) 9%,var(--surface));font-size:14px}
@@ -135,20 +160,25 @@ table.st td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middl
   <div class="hd-r">
     <nav class="tabs" id="tabs" role="tablist"></nav>
     <button class="btn sm" id="sharebtn" data-act="share" hidden>Ссылка для коллег</button>
+    <button class="btn sm ghost" id="logoutbtn" data-act="logout" hidden>Выйти</button>
   </div>
 </div></header>
 <div class="wrap"><main id="main">
   <div class="card empty"><h1>Загружаем общий график…</h1><div class="small">Здесь появятся отпуска всех сотрудников.</div></div>
 </main></div>
+<div id="pkroot"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
 (function(){
 const MS=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
 const MN=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-/* Производственный календарь 2027: постановление Правительства РФ № 1187 от 17.09.2026 */
-const REST=[['2027-01-01','2027-01-10','Новогодние каникулы и Рождество'],['2027-02-21','2027-02-23','День защитника Отечества'],['2027-03-06','2027-03-08','Международный женский день'],['2027-05-01','2027-05-03','Праздник Весны и Труда'],['2027-05-08','2027-05-10','День Победы'],['2027-06-12','2027-06-14','День России'],['2027-11-04','2027-11-07','День народного единства'],['2027-12-31','2027-12-31','Перенесённый выходной']];
-const WORKSAT=[['2027-02-20','Рабочая суббота (выходной перенесён на 22 февраля)']];
+/* Производственный календарь 2027 (постановление Правительства РФ № 1187 от 17.09.2026).
+   REDDAYS — праздники и нерабочие дни, выделяются красным. HOL — праздники по ст. 112 ТК, не входят в отпуск. */
+const REDDAYS=new Set(['01-01','01-02','01-03','01-04','01-05','01-06','01-07','01-08','01-09','01-10','02-22','02-23','03-08','05-01','05-03','05-09','05-10','06-12','06-14','11-04','11-05','12-31'].map(d=>'2027-'+d));
+const RED_LIST=[['1–10 января','Новогодние каникулы и Рождество'],['22–23 февраля','День защитника Отечества'],['8 марта','Международный женский день'],['1 и 3 мая','Праздник Весны и Труда'],['9 и 10 мая','День Победы'],['12 и 14 июня','День России'],['4–5 ноября','День народного единства'],['31 декабря','Выходной (перенос с 3 января)']];
+const WORK_LIST=[['20 февраля','Рабочая суббота (выходной перенесён на 22 февраля)']];
+const isRed=iso=>REDDAYS.has(iso);
 const HOL=['01-01','01-02','01-03','01-04','01-05','01-06','01-07','01-08','02-23','03-08','05-01','05-09','06-12','11-04'];
 const DAY=864e5;
 const pad=n=>String(n).padStart(2,'0');
@@ -187,16 +217,16 @@ const TEAM={
 const hp=new URLSearchParams(location.hash.slice(1));
 const FC=window.FIREBASE_CONFIG||{};
 let CFG={apiKey:(hp.get('a')||FC.apiKey||ls.get('otp.a')||'').trim(),projectId:(hp.get('p')||FC.projectId||ls.get('otp.p')||'').trim()};
-let KEY=(hp.get('k')||ls.get('otp.k')||'').trim();
+let KEY=(hp.get('k')||ls.get('otp.k')||'').trim().toLowerCase();
 if(hp.get('a'))ls.set('otp.a',CFG.apiKey);
 if(hp.get('p'))ls.set('otp.p',CFG.projectId);
 if(hp.get('k'))ls.set('otp.k',KEY);
 const builtIn=!!(FC.apiKey&&FC.projectId);
 
+if(hp.get('k')&&builtIn){try{history.replaceState(null,'',location.pathname)}catch(e){}}
 function shareLink(){
-  const p=new URLSearchParams();
-  if(!builtIn){p.set('p',CFG.projectId);p.set('a',CFG.apiKey)}
-  p.set('k',KEY);
+  if(builtIn)return location.origin+location.pathname;
+  const p=new URLSearchParams();p.set('p',CFG.projectId);p.set('a',CFG.apiKey);
   return location.origin+location.pathname+'#'+p.toString();
 }
 let fdb=null,col=null,unsub=null,loadTimer=null;
@@ -251,8 +281,7 @@ function timeline(rows,opts){
   let head='',lines='',hol='';
   for(let m=0;m<12;m++){const d=(Date.UTC(y,m+1,1)-Date.UTC(y,m,1))/DAY;head+='<span style="width:'+(d/N*100)+'%">'+MN[m]+'</span>';
     if(m) lines+='<b class="ml" style="left:'+((Date.UTC(y,m,1)-y0)/DAY/N*100)+'%"></b>';}
-  REST.forEach(r=>{if(r[0].startsWith(y+'-'))hol+='<b class="rest" style="'+pos(r[0],r[1])+'" title="'+esc(r[2]+': '+fmtR(r[0],r[1]))+'"></b>'});
-  HOL.forEach(h=>{const t=toD(y+'-'+h);hol+='<b class="hol" style="'+pos(fromT(t),fromT(t))+'"></b>'});
+  REDDAYS.forEach(d=>{if(d.startsWith(y+'-'))hol+='<b class="hol" style="'+pos(d,d)+'"></b>'});
   let h='<div class="tlbox"><div class="tl"><div class="tl-row tl-head"><div class="tl-lab muted small">'+esc(opts.corner||'Сотрудник')+'</div><div class="tl-track">'+head+'</div></div>';
   rows.forEach(r=>{
     h+='<div class="tl-row'+(r.me?' me':'')+'"><div class="tl-lab" title="'+esc(r.label)+'"><span class="dot" style="background:var(--d'+r.c+')"></span><span class="n">'+esc(r.label)+'</span></div><div class="tl-track">'+lines+hol;
@@ -288,6 +317,7 @@ function renderTabs(){
   document.getElementById('tabs').innerHTML=show?t.map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.tab===x[0])+'">'+x[1]+'</button>').join(''):'';
   document.getElementById('tabs').hidden=!show;
   document.getElementById('sharebtn').hidden=!show;
+  document.getElementById('logoutbtn').hidden=!show||!builtIn;
   document.getElementById('yr').textContent=year();
 }
 function render(){
@@ -297,7 +327,10 @@ function render(){
   if(S.state==='setup'){m.innerHTML=viewSetup();}
   else if(S.state==='loading'){m.innerHTML='<div class="card empty"><h1>Загружаем общий график…</h1><div class="small">Здесь появятся отпуска всех сотрудников.</div></div>';}
   else if(S.state==='error'){m.innerHTML='<div class="card empty"><h1>Не удалось открыть график</h1><div class="small">'+esc(S.fatal)+'</div><button class="btn" data-act="retry">Попробовать снова</button></div>';}
-  else if(S.state==='nolink'){m.innerHTML='<div class="card empty"><h1>Откройте страницу по ссылке</h1><div class="small">Попросите у руководителя ссылку на график отпусков: в ней есть доступ к общей базе.</div></div>';}
+  else if(S.state==='login'){m.innerHTML='<form class="card" id="loginf" style="max-width:420px;margin:24px auto 0;width:100%" autocomplete="off"><h1>Вход в график отпусков</h1>'+
+    '<div class="small muted">Введите ключ доступа, который прислал руководитель.</div>'+
+    '<label class="f" for="lkey">Ключ доступа<input id="lkey" name="lkey" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" placeholder="9 букв и цифр" style="font-size:18px;letter-spacing:.12em"></label>'+
+    '<div class="row"><button class="btn pri" type="submit" id="lbtn">Войти</button><span class="status '+(S.loginMsg?'err':'')+'">'+esc(S.loginMsg||'')+'</span></div></form>';}
   else{
     const pre=S.stale?'<div class="banner">Нет связи с общей базой. Показаны последние полученные данные, сохранение может не пройти.</div>':'';
     m.innerHTML=pre+(S.tab==='team'?viewTeam():viewMine());
@@ -309,7 +342,7 @@ function viewSetup(){
   return '<section class="card"><h1>Подключение к базе</h1>'+
     '<div class="note">Этот экран нужен только руководителю один раз. Коллеги его не увидят: они получат готовую ссылку.</div>'+
     '<label class="f" for="scfg">Вставьте целиком блок firebaseConfig из настроек проекта Firebase<textarea id="scfg" rows="7" style="font:13px/1.4 ui-monospace,Menlo,monospace;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;…&quot;,&#10;  projectId: &quot;…&quot;,&#10;  …&#10;};"></textarea></label>'+
-    '<label class="f" for="skey">Ключ команды<input id="skey" value="'+esc(KEY||'aacdqcksp4zy')+'" autocapitalize="off" autocomplete="off"></label>'+
+    '<label class="f" for="skey">Ключ команды<input id="skey" value="'+esc(KEY||'xf4ny9eh6')+'" autocapitalize="off" autocomplete="off"></label>'+
     '<div class="row"><button class="btn pri" data-act="connect" id="sconn">Подключить</button><span class="status '+(S.msgKind||'')+'">'+esc(S.msg)+'</span></div></section>';
 }
 
@@ -320,12 +353,89 @@ function empOptions(sel){
     if(!list.length)return;h+='<optgroup label="'+esc(dirName(g))+'">'+list.map(e=>'<option value="'+esc(e.id)+'"'+(e.id===sel?' selected':'')+'>'+esc(e.name)+'</option>').join('')+'</optgroup>'});
   return h;
 }
+function redIn(s,e){const r=[];for(let t=toD(s);t<=toD(e);t+=DAY){const d=fromT(t);if(isRed(d))r.push(d)}return r}
+function fmtDays(list){
+  const out=[];let i=0;
+  while(i<list.length){let j=i;while(j+1<list.length&&toD(list[j+1])-toD(list[j])===DAY)j++;out.push(fmtR(list[i],list[j]));i=j+1}
+  return out.join(', ');
+}
+
+/* ---------- календарь выбора дат (только 2027) ---------- */
+const MFULL=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+let PK=null;
+function openPicker(i){
+  const p=S.draft[i]||{};const y=year();
+  let m=p.s?Number(p.s.slice(5,7))-1:(i>0&&S.draft[i-1]&&S.draft[i-1].e?Number(S.draft[i-1].e.slice(5,7))-1:0);
+  PK={i,m,a:p.s||'',b:p.e||'',isNew:!p.s};
+  renderPicker();
+}
+function closePicker(apply){
+  if(!PK)return;const i=PK.i;
+  if(apply&&PK.a){S.draft[i]={s:PK.a,e:PK.b||PK.a};S.dirty=true;S.msg=''}
+  else if(PK.isNew&&!(S.draft[i]&&S.draft[i].s)){S.draft.splice(i,1)}
+  PK=null;document.getElementById('pkroot').innerHTML='';render();
+  const el=document.getElementById('pb'+i);if(el)el.focus();
+}
+function busyMap(){
+  const me=S.me,map={};
+  emps().forEach(o=>{if(o.id===me)return;okPeriods(o.id).forEach(p=>{for(let t=toD(p.s);t<=toD(p.e);t+=DAY){const d=fromT(t);(map[d]=map[d]||[]).push(o)}})});
+  return map;
+}
+function renderPicker(){
+  const root=document.getElementById('pkroot');
+  if(!PK){root.innerHTML='';return}
+  const y=year(),m=PK.m,busy=busyMap();
+  const first=Date.UTC(y,m,1),nd=(Date.UTC(y,m+1,1)-first)/DAY,off=(new Date(first).getUTCDay()+6)%7;
+  const lo=PK.a,hi=PK.b||PK.a;
+  let g=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>'<div class="pk-dow">'+d+'</div>').join('');
+  for(let k=0;k<off;k++)g+='<div></div>';
+  for(let d=1;d<=nd;d++){
+    const iso=y+'-'+pad(m+1)+'-'+pad(d),wd=(off+d-1)%7;
+    const c=['pk-d'];if(wd>=5)c.push('we');if(isRed(iso))c.push('red');
+    if(lo&&iso>=lo&&iso<=hi)c.push('in');if(iso===lo||(PK.b&&iso===PK.b))c.push('edge');
+    const n=(busy[iso]||[]).length;
+    const tip=(isRed(iso)?'Праздник/нерабочий день. ':'')+(n?'В отпуске: '+busy[iso].map(o=>o.name).join(', '):'');
+    g+='<button class="'+c.join(' ')+'" data-pkd="'+iso+'"'+(tip?' title="'+esc(tip)+'"':'')+' aria-label="'+d+' '+MS[m]+(tip?'. '+esc(tip):'')+'">'+d+(n?'<i>'+'<b></b>'.repeat(Math.min(n,3))+'</i>':'')+'</button>';
+  }
+  let sum='';
+  if(!PK.a) sum='<span class="muted">Нажмите на дату начала отпуска</span>';
+  else if(!PK.b) sum='<span>Начало: <b>'+fmtR(PK.a,PK.a)+'</b>. Теперь нажмите на дату окончания</span>';
+  else{
+    const days=countDays(PK.a,PK.b),cal=calLen(PK.a,PK.b),reds=redIn(PK.a,PK.b);
+    sum='<span><b>'+fmtR(PK.a,PK.b)+'</b> · '+days+' '+dayWord(days)+' отпуска'+(cal!==days?' (из '+cal+' календарных)':'')+'</span>';
+    if(reds.length)sum+='<span class="redtxt">Праздники в периоде: '+fmtDays(reds)+'</span>';
+    const ov=[];emps().forEach(o=>{if(o.id===S.me)return;okPeriods(o.id).forEach(q=>{const x=inter({s:PK.a,e:PK.b},q);if(x)ov.push(o.name+' ('+fmtR(x.s,x.e)+')')})});
+    if(ov.length)sum+='<span class="muted">Пересечения: '+esc(ov.join(', '))+'</span>';
+  }
+  root.innerHTML='<div class="pkwrap" data-pkclose="1"><div class="pk" role="dialog" aria-modal="true" aria-label="Выбор дат отпуска">'+
+    '<div class="pk-hd"><button class="pk-nav" data-pkm="-1"'+(m<=0?' disabled':'')+' aria-label="Предыдущий месяц">‹</button><h2>'+MFULL[m]+' '+y+'</h2><button class="pk-nav" data-pkm="1"'+(m>=11?' disabled':'')+' aria-label="Следующий месяц">›</button></div>'+
+    '<div class="pk-grid">'+g+'</div>'+
+    '<div class="pk-leg"><span><u style="background:color-mix(in srgb,var(--clash) 24%,var(--surface))"></u>праздник</span><span><u style="background:color-mix(in srgb,var(--muted) 16%,var(--surface))"></u>выходной</span><span><u style="background:var(--accent)"></u>ваш период</span><span>• коллеги в отпуске</span></div>'+
+    '<div class="pk-sum">'+sum+'</div>'+
+    '<div class="row" style="justify-content:flex-end"><button class="btn" data-pkx="cancel">Отмена</button><button class="btn pri" data-pkx="ok"'+(PK.a?'':' disabled')+'>Готово</button></div>'+
+    '</div></div>';
+}
+document.addEventListener('click',ev=>{
+  if(!PK)return;
+  const t=ev.target;
+  const d=t.closest('[data-pkd]'),nav=t.closest('[data-pkm]'),x=t.closest('[data-pkx]');
+  if(d){const iso=d.dataset.pkd;
+    if(!PK.a||PK.b){PK.a=iso;PK.b=''}
+    else if(iso<PK.a){PK.a=iso}
+    else PK.b=iso;
+    renderPicker();return}
+  if(nav){PK.m=Math.max(0,Math.min(11,PK.m+Number(nav.dataset.pkm)));renderPicker();return}
+  if(x){closePicker(x.dataset.pkx==='ok');return}
+  if(t.dataset&&t.dataset.pkclose)closePicker(false);
+});
+document.addEventListener('keydown',ev=>{if(PK&&ev.key==='Escape')closePicker(false)});
+
 function holidaysCard(){
   if(year()!==2027)return '';
   return '<section class="card"><h2>Праздники и выходные 2027</h2><ul class="hlist">'+
-    REST.map(r=>'<li><b>'+fmtR(r[0],r[1])+'</b><span>'+esc(r[2])+'</span></li>').join('')+
-    WORKSAT.map(r=>'<li class="work"><b>'+fmtR(r[0],r[0])+'</b><span>'+esc(r[1])+'</span></li>').join('')+
-    '</ul><div class="note">Производственный календарь утверждён постановлением Правительства РФ № 1187 от 17.09.2026. В отпуск не засчитываются только сами праздники: 1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября. Перенесённые выходные (например, 22 февраля, 5 ноября, 31 декабря) входят в отпуск как обычные дни.</div></section>';
+    RED_LIST.map(r=>'<li><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></li>').join('')+
+    WORK_LIST.map(r=>'<li class="work"><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></li>').join('')+
+    '</ul><div class="note">По ТК РФ в отпуск не засчитываются праздники: 1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября. Перенесённые выходные (9–10 января, 22 февраля, 3 и 10 мая, 14 июня, 5 ноября, 31 декабря) входят в отпуск как обычные дни.</div></section>';
 }
 
 function viewMine(){
@@ -342,29 +452,30 @@ function viewMine(){
   h+='<section class="card"><div class="row" style="justify-content:space-between"><h2>Мои периоды</h2><span class="small muted">'+(S.dirty?'Есть несохранённые изменения':'')+'</span></div><div class="periods">';
   if(!a.rows.length) h+='<div class="note">Периодов пока нет. Добавьте первый: одна из частей должна быть не короче 14 дней, остальные — любой длины.</div>';
   a.rows.forEach((p,i)=>{
-    h+='<div class="prow"><label class="f" for="ps'+i+'">Начало<input type="date" id="ps'+i+'" class="pd" data-i="'+i+'" data-k="s" value="'+esc(p.s)+'" min="'+year()+'-01-01" max="'+year()+'-12-31"></label>'+
-      '<label class="f" for="pe'+i+'">Окончание<input type="date" id="pe'+i+'" class="pd" data-i="'+i+'" data-k="e" value="'+esc(p.e)+'" min="'+(p.s||year()+'-01-01')+'" max="'+year()+'-12-31"></label>'+
+    const reds=(p.s&&p.e&&p.e>=p.s)?redIn(p.s,p.e):[];
+    h+='<div class="prow"><button class="pbtn'+(p.s?'':' empty')+'" id="pb'+i+'" data-act="pick" data-i="'+i+'">'+(p.s&&p.e?fmtR(p.s,p.e):'Выберите даты')+'</button>'+
       '<div class="days'+(p.days>=14?' long':'')+'">'+(p.err?'—':p.days+' '+dayWord(p.days))+'</div>'+
       '<button class="btn ghost" data-act="del-period" data-i="'+i+'" aria-label="Удалить период" title="Удалить период">✕</button>'+
-      (p.err?'<div class="perr">'+esc(p.err)+'</div>':(p.days!==calLen(p.s,p.e)?'<div class="perr info">'+(calLen(p.s,p.e)-p.days)+' праздн. не засчитано</div>':''))+'</div>';
+      (p.err&&p.s?'<div class="perr">'+esc(p.err)+'</div>':'')+
+      (!p.err&&reds.length?'<div class="perr info"><span class="redtxt">Праздники: '+fmtDays(reds)+'</span>'+(p.days!==calLen(p.s,p.e)?' · '+(calLen(p.s,p.e)-p.days)+' дн. не засчитано':'')+'</div>':'')+'</div>';
   });
   h+='</div><div class="row"><button class="btn" data-act="add-period" id="addp">+ Добавить период</button>'+
     '<button class="btn pri" data-act="save-plan" id="savep"'+(S.saving||!S.dirty?' disabled':'')+'>'+(S.saving?'Сохраняем…':'Сохранить')+'</button>'+
     (S.dirty?'<button class="btn ghost" data-act="reset-plan">Отменить изменения</button>':'')+
     '<span class="status '+(S.msgKind||'')+'">'+esc(S.msg)+'</span></div>'+
-    '<div class="note">Праздничные дни (1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября) в отпуск не засчитываются, как в ТК РФ. Выходные засчитываются.</div></section>';
+    '<div class="note">Праздники отмечены красным. В отпуск не засчитываются праздники по ТК РФ (1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября), выходные засчитываются.</div></section>';
 
   const mine=a.ok;const others=emps().filter(e=>e.id!==me.id);
   const ov=[];others.forEach(o=>okPeriods(o.id).forEach(q=>mine.forEach(p=>{const x=inter(p,q);if(x)ov.push({o,s:x.s,e:x.e})})));
   ov.sort((x,y)=>(x.o.dir===me.dir?0:1)-(y.o.dir===me.dir?0:1)||(x.s<y.s?-1:1));
-  h+='<section class="card"><h2>Пересечения с коллегами</h2>';
+  h+='<section class="card"><div class="row" style="justify-content:space-between"><h2>Пересечения с коллегами</h2><button class="btn sm" data-act="xls" id="xls2">⤓ Excel по команде</button></div>';
   if(!mine.length) h+='<div class="note">Добавьте даты, и здесь появятся коллеги, которые отдыхают в то же время.</div>';
   else if(!ov.length) h+='<div><span class="chip ok">✓ Ни с кем не пересекаетесь</span></div>';
   else h+='<ul class="olist">'+ov.map(x=>{const same=x.o.dir===me.dir;return '<li class="'+(same?'same':'')+'"><span class="dot" style="background:var(--d'+dirIdx(x.o.dir)+')"></span><b>'+esc(x.o.name)+'</b><span class="muted">'+esc(dirName(x.o.dir))+'</span><span>'+fmtR(x.s,x.e)+' · '+calLen(x.s,x.e)+' дн.</span>'+(same?'<span class="tag">Ваше направление</span>':'')+'</li>'}).join('')+'</ul>';
   const sorted=others.slice().sort((x,y)=>(x.dir===me.dir?0:1)-(y.dir===me.dir?0:1));
   const rows=[{label:me.name+' (вы)',c:dirIdx(me.dir),me:true,periods:mine,clash:ov.map(x=>({s:x.s,e:x.e}))}]
     .concat(sorted.map(o=>{const ps=okPeriods(o.id);const cl=[];ps.forEach(q=>mine.forEach(p=>{const x=inter(p,q);if(x)cl.push(x)}));return {label:o.name,c:dirIdx(o.dir),periods:ps,clash:cl}}));
-  h+=timeline(rows,{corner:'Год '+year()})+'<div class="legend"><span><i style="background:var(--d1)"></i>отпуск (цвет — направление)</span><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение с вами</span><span><i style="background:color-mix(in srgb,var(--clash) 32%,transparent)"></i>праздник (не входит в отпуск)</span><span><i style="background:color-mix(in srgb,var(--clash) 13%,transparent)"></i>нерабочие дни вокруг праздников</span></div></section>'+holidaysCard();
+  h+=timeline(rows,{corner:'Год '+year()})+'<div class="legend"><span><i style="background:var(--d1)"></i>отпуск (цвет — направление)</span><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение с вами</span><span><i style="background:color-mix(in srgb,var(--clash) 32%,transparent)"></i>праздники и нерабочие дни</span></div></section>'+holidaysCard();
   return h;
 }
 
@@ -374,7 +485,7 @@ function viewTeam(){
   if(emps().some(e=>!e.dir))groups.push({id:'',name:'Без направления',c:0});
   const inG=(e,g)=>(e.dir||'')===g.id;
   if(S.filter!=='all'&&!groups.find(g=>g.id===S.filter))S.filter='all';
-  let h='<section class="card"><h2>Команда по направлениям</h2><div class="filters">'+
+  let h='<section class="card"><div class="row" style="justify-content:space-between"><h2>Команда по направлениям</h2><button class="btn sm" data-act="xls" id="xls1">⤓ Скачать в Excel'+(S.filter!=='all'?' (направление)':'')+'</button></div><div class="filters">'+
     '<button data-f="all" aria-pressed="'+(S.filter==='all')+'">Все · '+emps().length+'</button>'+
     groups.filter(g=>emps().some(e=>inG(e,g))).map(g=>'<button data-f="'+esc(g.id)+'" aria-pressed="'+(S.filter===g.id)+'"><span class="dot" style="background:var(--d'+g.c+')"></span>'+esc(g.name)+' · '+emps().filter(e=>inG(e,g)).length+'</button>').join('')+'</div>';
   groups.filter(g=>S.filter==='all'||g.id===S.filter).forEach(g=>{
@@ -384,7 +495,7 @@ function viewTeam(){
     const rows=L.map(x=>({label:x.emp.name,c:g.c,periods:x.periods,clash:ov.filter(o=>o.a===x.emp||o.b===x.emp).map(o=>({s:o.s,e:o.e}))}));
     h+='<div class="dirblock"><div class="dirhd"><span class="dot" style="background:var(--d'+g.c+')"></span><h3>'+esc(g.name)+'</h3><span class="small muted">'+list.length+' чел. · пересечений внутри: '+ov.length+'</span></div>'+timeline(rows,{coverage:true,corner:g.name})+'</div>';
   });
-  h+='<div class="legend"><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение внутри направления</span><span><i style="background:color-mix(in srgb,var(--clash) 60%,transparent)"></i>в отпуске половина направления и больше</span><span><i style="background:color-mix(in srgb,var(--clash) 32%,transparent)"></i>праздник (не входит в отпуск)</span><span><i style="background:color-mix(in srgb,var(--clash) 13%,transparent)"></i>нерабочие дни вокруг праздников</span></div></section>';
+  h+='<div class="legend"><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение внутри направления</span><span><i style="background:color-mix(in srgb,var(--clash) 60%,transparent)"></i>в отпуске половина направления и больше</span><span><i style="background:color-mix(in srgb,var(--clash) 32%,transparent)"></i>праздники и нерабочие дни</span></div></section>';
 
   const scope=emps().filter(e=>S.filter==='all'||(e.dir||'')===S.filter);
   const all=pairOverlaps(scope.map(e=>({emp:e,periods:okPeriods(e.id)})));
@@ -443,6 +554,191 @@ function subscribe(onFirst){
   });
 }
 
+
+/* ---------- выгрузка в Excel (.xlsx собирается прямо в браузере) ---------- */
+const XL={
+  crcT:(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})(),
+  crc(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=XL.crcT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0},
+  zip(files){
+    const enc=new TextEncoder(),parts=[],cd=[];let off=0;
+    const u16=v=>[v&255,(v>>8)&255],u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+    files.forEach(f=>{
+      const name=enc.encode(f.name),data=enc.encode(f.data),crc=XL.crc(data);
+      const head=[...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(33),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0)];
+      parts.push(new Uint8Array(head),name,data);
+      cd.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(33),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),name);
+      off+=head.length+name.length+data.length;
+    });
+    const cdSize=cd.reduce((a,x)=>a+x.length,0);
+    const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cdSize),...u32(off),...u16(0)]);
+    return new Blob([...parts,...cd,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  },
+  x(v){return String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))},
+  col(n){let s='';n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s}
+};
+function makeStyles(){
+  const fills=['none','gray125'],fonts=['<font><sz val="10"/><name val="Arial"/></font>'],xfs=['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'],map={};
+  return {
+    get(o){o=o||{};const key=JSON.stringify(o);if(map[key]!=null)return map[key];
+      let fi=0;if(o.fill){const f='<fill><patternFill patternType="solid"><fgColor rgb="FF'+o.fill+'"/><bgColor indexed="64"/></patternFill></fill>';fi=fills.indexOf(f);if(fi<0){fills.push(f);fi=fills.length-1}}
+      let fo=0;if(o.bold||o.color||o.size){const f='<font>'+(o.bold?'<b/>':'')+'<sz val="'+(o.size||10)+'"/>'+(o.color?'<color rgb="FF'+o.color+'"/>':'')+'<name val="Arial"/></font>';fo=fonts.indexOf(f);if(fo<0){fonts.push(f);fo=fonts.length-1}}
+      const al=o.align||o.wrap||o.valign?'<alignment'+(o.align?' horizontal="'+o.align+'"':'')+(o.valign?' vertical="'+o.valign+'"':' vertical="center"')+(o.wrap?' wrapText="1"':'')+'/>':'';
+      xfs.push('<xf numFmtId="0" fontId="'+fo+'" fillId="'+fi+'" borderId="'+(o.border?1:0)+'" xfId="0"'+(fi?' applyFill="1"':'')+(fo?' applyFont="1"':'')+(o.border?' applyBorder="1"':'')+(al?' applyAlignment="1">'+al+'</xf>':'/>'));
+      return map[key]=xfs.length-1},
+    xml(){
+      const f=x=>x==='none'||x==='gray125'?'<fill><patternFill patternType="'+x+'"/></fill>':x;
+      return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+        '<fonts count="'+fonts.length+'">'+fonts.join('')+'</fonts><fills count="'+fills.length+'">'+fills.map(f).join('')+'</fills>'+
+        '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFD9E1EA"/></left><right style="thin"><color rgb="FFD9E1EA"/></right><top style="thin"><color rgb="FFD9E1EA"/></top><bottom style="thin"><color rgb="FFD9E1EA"/></bottom><diagonal/></border></borders>'+
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="'+xfs.length+'">'+xfs.join('')+'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'}
+  };
+}
+function makeSheet(name){
+  const rows={},merges=[],cols=[];let freeze=null,heights={};
+  return {name,
+    set(r,c,v,st){(rows[r]=rows[r]||{})[c]={v,st}},
+    merge(r1,c1,r2,c2){merges.push(XL.col(c1)+(r1+1)+':'+XL.col(c2)+(r2+1))},
+    width(c,w,c2){cols.push('<col min="'+(c+1)+'" max="'+((c2==null?c:c2)+1)+'" width="'+w+'" customWidth="1"/>')},
+    height(r,h){heights[r]=h},
+    freeze(r,c){freeze={r,c}},
+    xml(){
+      let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
+      x+='<sheetViews><sheetView workbookViewId="0" zoomScale="90">'+(freeze?'<pane'+(freeze.c?' xSplit="'+freeze.c+'"':'')+(freeze.r?' ySplit="'+freeze.r+'"':'')+' topLeftCell="'+XL.col(freeze.c)+(freeze.r+1)+'" activePane="bottomRight" state="frozen"/>':'')+'</sheetView></sheetViews>';
+      x+='<sheetFormatPr defaultRowHeight="15"/>';
+      if(cols.length)x+='<cols>'+cols.join('')+'</cols>';
+      x+='<sheetData>';
+      Object.keys(rows).map(Number).sort((a,b)=>a-b).forEach(r=>{
+        x+='<row r="'+(r+1)+'"'+(heights[r]?' ht="'+heights[r]+'" customHeight="1"':'')+'>';
+        Object.keys(rows[r]).map(Number).sort((a,b)=>a-b).forEach(c=>{
+          const {v,st}=rows[r][c],ref=XL.col(c)+(r+1),sa=st?' s="'+st+'"':'';
+          if(v===null||v===undefined||v==='')x+='<c r="'+ref+'"'+sa+'/>';
+          else if(typeof v==='number')x+='<c r="'+ref+'"'+sa+'><v>'+v+'</v></c>';
+          else x+='<c r="'+ref+'"'+sa+' t="inlineStr"><is><t xml:space="preserve">'+XL.x(v)+'</t></is></c>';
+        });
+        x+='</row>';
+      });
+      x+='</sheetData>';
+      if(merges.length)x+='<mergeCells count="'+merges.length+'">'+merges.map(m=>'<mergeCell ref="'+m+'"/>').join('')+'</mergeCells>';
+      return x+'</worksheet>';
+    }};
+}
+function buildWorkbook(sheets,styles){
+  const files=[
+    {name:'[Content_Types].xml',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+sheets.map((s,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('')+'</Types>'},
+    {name:'_rels/.rels',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {name:'xl/workbook.xml',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+sheets.map((s,i)=>'<sheet name="'+XL.x(s.name)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('')+'</sheets></workbook>'},
+    {name:'xl/_rels/workbook.xml.rels',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((s,i)=>'<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('')+'<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+    {name:'xl/styles.xml',data:styles.xml()}
+  ];
+  sheets.forEach((s,i)=>files.push({name:'xl/worksheets/sheet'+(i+1)+'.xml',data:s.xml()}));
+  return XL.zip(files);
+}
+
+const XCOL={0:'D0D6DD',1:'9DC3EC',2:'F3CD8F',3:'CDB6EC',4:'9ED9BC',5:'F0B3C8',6:'B7C9D6'};
+const XC={red:'E0503A',orange:'F5A35C',hol:'F8C9C1',holCell:'FCE4E0',we:'EEF1F4',head:'E3E9EF',grp:'D7E7E6',ok:'CDEBD8',warn:'FBE3B5',bad:'F6C9C1'};
+const dmy=iso=>iso.slice(8,10)+'.'+iso.slice(5,7)+'.'+iso.slice(0,4);
+
+function buildReport(dirFilter){
+  const y=year(),st=makeStyles();
+  const groups=dirs().map(d=>({id:d,name:d,c:dirIdx(d)}));
+  if(emps().some(e=>!e.dir))groups.push({id:'',name:'Без направления',c:0});
+  const inScope=e=>dirFilter==null||(e.dir||'')===dirFilter;
+  const people=emps().filter(inScope);
+  const per={};people.forEach(e=>per[e.id]=okPeriods(e.id));
+  const y0=Date.UTC(y,0,1),N=(Date.UTC(y+1,0,1)-y0)/DAY;
+  const dayIso=i=>fromT(y0+i*DAY);
+  const onDay={};people.forEach(e=>{per[e.id].forEach(p=>{for(let t=toD(p.s);t<=toD(p.e);t+=DAY){const k=(t-y0)/DAY;(onDay[k]=onDay[k]||[]).push(e)}})});
+  const title='Отпуска '+y+(dirFilter!=null?' — '+dirName(dirFilter):'');
+
+  /* --- Лист 1: календарь --- */
+  const S1=makeSheet('Календарь');const F=3,HR=7;
+  S1.width(0,26);S1.width(1,24);S1.width(2,9);S1.width(F,3.4,F+N-1);
+  S1.set(0,0,title,st.get({bold:true,size:14}));S1.height(0,22);
+  S1.set(1,0,'Выгрузка от '+new Date().toLocaleString('ru-RU'),st.get({color:'5A6879'}));
+  const leg=[['Отпуск (цвет — направление)',XCOL[1],'15212F'],['Пересечение внутри направления',XC.red,'FFFFFF'],['Пересечение с другим направлением',XC.orange,'15212F'],['Праздник / нерабочий день',XC.hol,'15212F']];
+  leg.forEach((l,i)=>{const sty=st.get({fill:l[1],color:l[2],border:true});S1.set(2+i,0,l[0],sty);S1.set(2+i,1,'',sty);S1.merge(2+i,0,2+i,1)});
+  // шапка: месяцы, числа, дни недели
+  for(let m=0;m<12;m++){const a=(Date.UTC(y,m,1)-y0)/DAY,b=(Date.UTC(y,m+1,1)-y0)/DAY-1;
+    S1.set(HR,F+a,MFULL[m],st.get({bold:true,fill:XC.head,align:'center',border:true}));for(let k=a+1;k<=b;k++)S1.set(HR,F+k,'',st.get({fill:XC.head,border:true}));S1.merge(HR,F+a,HR,F+b)}
+  ['ФИО','Направление','Дней'].forEach((h,i)=>{S1.set(HR,i,'',st.get({fill:XC.head,border:true}));S1.set(HR+1,i,h,st.get({bold:true,fill:XC.head,border:true,align:i==2?'center':undefined}));S1.set(HR+2,i,'',st.get({fill:XC.head,border:true}))});
+  const WD=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  for(let k=0;k<N;k++){const iso=dayIso(k),wd=new Date(y0+k*DAY).getUTCDay(),red=isRed(iso),we=wd===0||wd===6;
+    const fill=red?XC.hol:we?XC.we:'FFFFFF';
+    S1.set(HR+1,F+k,Number(iso.slice(8)),st.get({bold:true,fill,align:'center',border:true,size:9,color:red?'C0392B':undefined}));
+    S1.set(HR+2,F+k,WD[wd],st.get({fill,align:'center',border:true,size:8,color:red?'C0392B':'5A6879'}));}
+  let r=HR+3;
+  groups.forEach(g=>{
+    const list=people.filter(e=>(e.dir||'')===g.id);if(!list.length)return;
+    S1.set(r,0,g.name,st.get({bold:true,fill:XC.grp,border:true}));S1.set(r,1,'',st.get({fill:XC.grp,border:true}));S1.set(r,2,'',st.get({fill:XC.grp,border:true}));
+    for(let k=0;k<N;k++)S1.set(r,F+k,'',st.get({fill:XC.grp}));
+    S1.merge(r,0,r,2);r++;
+    list.forEach(e=>{
+      const a=analyze(S.data.plans[e.id]);
+      S1.set(r,0,e.name,st.get({border:true}));S1.set(r,1,dirName(e.dir),st.get({border:true,color:'5A6879'}));S1.set(r,2,a.total+'/'+ent(e),st.get({border:true,align:'center'}));
+      const mine=new Set();per[e.id].forEach(p=>{for(let t=toD(p.s);t<=toD(p.e);t+=DAY)mine.add((t-y0)/DAY)});
+      for(let k=0;k<N;k++){const iso=dayIso(k),wd=new Date(y0+k*DAY).getUTCDay();
+        if(mine.has(k)){const others=(onDay[k]||[]).filter(o=>o!==e);
+          const same=others.some(o=>(o.dir||'')===(e.dir||'')),cross=others.length>0;
+          S1.set(r,F+k,same?'×':'',st.get({fill:same?XC.red:cross?XC.orange:XCOL[g.c],color:'FFFFFF',bold:true,align:'center',border:true,size:8}));
+        }else S1.set(r,F+k,'',st.get({fill:isRed(iso)?XC.holCell:(wd===0||wd===6)?XC.we:undefined,border:true}));
+      }
+      r++;
+    });
+    S1.set(r,0,'Одновременно в отпуске',st.get({color:'5A6879',border:true}));S1.set(r,1,'',st.get({border:true}));S1.set(r,2,'',st.get({border:true}));
+    for(let k=0;k<N;k++){const n=(onDay[k]||[]).filter(o=>(o.dir||'')===g.id).length;
+      const hot=n>=2&&n/list.length>=0.5;
+      S1.set(r,F+k,n||'',st.get({fill:n?(hot?XC.red:XCOL[g.c]):undefined,color:hot?'FFFFFF':undefined,bold:hot,align:'center',border:true,size:8}))}
+    r+=2;
+  });
+  if(dirFilter==null&&groups.length>1){
+    S1.set(r,0,'Всего в отпуске в день',st.get({bold:true,border:true}));S1.set(r,1,'',st.get({border:true}));S1.set(r,2,'',st.get({border:true}));
+    for(let k=0;k<N;k++){const n=(onDay[k]||[]).length;S1.set(r,F+k,n||'',st.get({fill:n>=3?XC.orange:undefined,align:'center',border:true,size:8,bold:n>=3}))}
+  }
+  S1.freeze(HR+3,F);
+
+  /* --- Лист 2: пересечения --- */
+  const S2=makeSheet('Пересечения');
+  const ov=pairOverlaps(people.map(e=>({emp:e,periods:per[e.id]})));
+  S2.width(0,5);S2.width(1,18);S2.width(2,18);S2.width(3,24);S2.width(4,24);S2.width(5,26);S2.width(6,12);S2.width(7,12);S2.width(8,8);S2.width(9,22);
+  S2.set(0,0,'Пересечения отпусков — '+title,st.get({bold:true,size:14}));S2.height(0,22);
+  S2.set(1,0,'Внутри направления: '+ov.filter(o=>o.a.dir===o.b.dir).length+'   ·   Между направлениями: '+ov.filter(o=>o.a.dir!==o.b.dir).length,st.get({color:'5A6879'}));
+  const H2=['№','Сотрудник 1','Сотрудник 2','Направление 1','Направление 2','Тип','С','По','Дней','Праздники в пересечении'];
+  H2.forEach((h,i)=>S2.set(3,i,h,st.get({bold:true,fill:XC.head,border:true,wrap:true})));
+  const sorted=ov.slice().sort((x,z)=>((x.a.dir===x.b.dir)?0:1)-((z.a.dir===z.b.dir)?0:1)||(x.s<z.s?-1:1));
+  if(!sorted.length)S2.set(4,0,'Пересечений нет',st.get({color:'2A8A52',bold:true}));
+  sorted.forEach((o,i)=>{const same=o.a.dir===o.b.dir,base={border:true,fill:same?'FBDAD4':'FDE9D6'};
+    const reds=redIn(o.s,o.e);
+    [i+1,o.a.name,o.b.name,dirName(o.a.dir),dirName(o.b.dir),same?'Внутри направления':'Между направлениями',dmy(o.s),dmy(o.e),calLen(o.s,o.e),reds.length?fmtDays(reds):''].forEach((v,c)=>S2.set(4+i,c,v,st.get(Object.assign({},base,c===5?{bold:true,color:same?'B03A2E':'9A5B12'}:{},c===0||c===8?{align:'center'}:{}))));
+  });
+  S2.freeze(4,0);
+
+  /* --- Лист 3: сводка --- */
+  const S3=makeSheet('Сводка');
+  S3.width(0,18);S3.width(1,24);S3.width(2,11);S3.width(3,15);S3.width(4,11);S3.width(5,13);S3.width(6,44);S3.width(7,26);S3.width(8,22);
+  S3.set(0,0,'Сводка по отпускам — '+title,st.get({bold:true,size:14}));S3.height(0,22);
+  const done=people.filter(e=>status(e).k==='ok').length;
+  S3.set(1,0,'Заполнили полностью: '+done+' из '+people.length,st.get({color:'5A6879'}));
+  const H3=['ФИО','Направление','Положено','Запланировано','Осталось','Часть ≥ 14 дн.','Периоды (дней в отпуск)','Праздники в периодах','Статус'];
+  H3.forEach((h,i)=>S3.set(3,i,h,st.get({bold:true,fill:XC.head,border:true,wrap:true})));
+  people.forEach((e,i)=>{const sx=status(e),a=sx.a;
+    const reds=[];a.ok.forEach(p=>reds.push(...redIn(p.s,p.e)));
+    const sf=sx.k==='ok'?XC.ok:sx.k==='bad'?XC.bad:sx.k==='warn'?XC.warn:undefined;
+    [e.name,dirName(e.dir),ent(e),a.total,ent(e)-a.total,a.has14?'да':'нет',a.ok.map(p=>dmy(p.s)+'–'+dmy(p.e)+' ('+p.days+')').join('; ')||'—',reds.length?fmtDays(reds):'',sx.t]
+      .forEach((v,c)=>S3.set(4+i,c,v,st.get({border:true,wrap:c===6||c===7,align:(c>=2&&c<=5)?'center':undefined,fill:c===8?sf:(c===5&&!a.has14&&a.ok.length?XC.bad:undefined),bold:c===8})));
+  });
+  S3.freeze(4,1);
+
+  return buildWorkbook([S1,S2,S3],st);
+}
+async function exportExcel(dirFilter){
+  try{
+    const blob=buildReport(dirFilter);
+    const fname='Otpuska_'+year()+(dirFilter!=null?'_napr'+(dirs().indexOf(dirFilter)+1):'')+'.xlsx';
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);toast('Файл Excel сформирован');
+  }catch(e){console.error(e);toast('Не удалось сформировать файл')}
+}
+
 /* ---------- действия ---------- */
 let toastT;
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{el.hidden=true},2600)}
@@ -458,7 +754,7 @@ document.addEventListener('click',async ev=>{
   const a=t.dataset.act,i=Number(t.dataset.i);
   if(a==='share'){
     const link=shareLink();
-    if(navigator.share){try{await navigator.share({title:'Отпуска '+year(),text:'Внесите, пожалуйста, свои отпуска на '+year()+' год',url:link});return}catch(e){if(e&&e.name==='AbortError')return}}
+    if(navigator.share){try{await navigator.share({title:'Отпуска '+year(),text:'Внесите, пожалуйста, свои отпуска на '+year()+' год. Ключ доступа пришлю отдельно.',url:link});return}catch(e){if(e&&e.name==='AbortError')return}}
     if(!(await copy(link))){window.prompt('Скопируйте ссылку',link)}
     return}
   if(a==='retry'){location.reload();return}
@@ -478,7 +774,10 @@ document.addEventListener('click',async ev=>{
       history.replaceState(null,'',shareLink());S.msg='';toast('Подключено. Ссылку для коллег — кнопкой вверху');
     });
     return}
-  if(a==='add-period'){S.draft.push({s:'',e:''});S.dirty=true;S.msg='';render();const el=document.getElementById('ps'+(S.draft.length-1));if(el)el.focus();return}
+  if(a==='add-period'){S.draft.push({s:'',e:''});render();openPicker(S.draft.length-1);return}
+  if(a==='pick'){openPicker(i);return}
+  if(a==='logout'){ls.set('otp.k','');location.replace(location.pathname);return}
+  if(a==='xls'){exportExcel(S.tab==='team'&&S.filter!=='all'?S.filter:null);return}
   if(a==='del-period'){S.draft.splice(i,1);S.dirty=true;S.msg='';render();return}
   if(a==='reset-plan'){setMe(S.me);render();return}
   if(a==='save-plan'){await savePlan();return}
@@ -486,10 +785,6 @@ document.addEventListener('click',async ev=>{
 document.addEventListener('change',ev=>{
   const t=ev.target;
   if(t.id==='me'){setMe(t.value);render();return}
-  if(t.classList.contains('pd')){const i=Number(t.dataset.i);S.draft[i][t.dataset.k]=t.value;
-    if(t.dataset.k==='s'&&t.value&&(!S.draft[i].e||S.draft[i].e<t.value))S.draft[i].e='';
-    S.dirty=true;S.msg='';render();
-    if(t.dataset.k==='s'&&!S.draft[i].e){const el=document.getElementById('pe'+i);if(el)el.focus()}}
 });
 async function savePlan(){
   if(!S.me||S.saving)return;
@@ -508,12 +803,32 @@ async function savePlan(){
   S.saving=false;render();
 }
 
+/* ---------- вход по ключу ---------- */
+function tryKey(k,fromStore){
+  KEY=k;S.state='loading';S.loginMsg='';render();
+  try{connect()}catch(e){S.state='error';S.fatal='Не загрузилась библиотека Firebase. Проверьте интернет или откройте ссылку с телефона.';render();return}
+  subscribe(err=>{
+    if(err){
+      KEY='';ls.set('otp.k','');if(unsub){unsub();unsub=null}
+      S.state='login';
+      S.loginMsg=err.code==='permission-denied'?(fromStore?'Ключ изменился. Введите новый ключ от руководителя.':'Неверный ключ. Проверьте и введите ещё раз.'):'Нет связи с базой. Проверьте интернет.';
+      render();const el=document.getElementById('lkey');if(el)el.focus();return}
+    ls.set('otp.k',KEY);
+  });
+}
+document.addEventListener('submit',ev=>{
+  if(ev.target.id!=='loginf')return;ev.preventDefault();
+  const v=document.getElementById('lkey').value.replace(/\s+/g,'').toLowerCase();
+  if(!v){S.loginMsg='Введите ключ';render();return}
+  tryKey(v,false);
+});
+
 /* ---------- запуск ---------- */
 if(!CFG.apiKey||!CFG.projectId){S.state='setup';render()}
-else if(!KEY){S.state='nolink';render()}
+else if(!KEY){S.state='login';render()}
 else{
   render();
-  try{connect();subscribe()}
+  try{tryKey(KEY,true)}
   catch(e){S.state='error';S.fatal='Не загрузилась библиотека Firebase. Проверьте интернет или откройте ссылку с телефона.';render()}
 }
 })();
