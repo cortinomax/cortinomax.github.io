@@ -99,7 +99,13 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .tl-head .tl-track span{flex:none;padding:7px 0 6px 5px;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;border-left:1px solid var(--line);overflow:hidden}
 .tl-head .tl-track span:first-child{border-left:0}
 .ml{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
-.hol{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--muted) 12%,transparent)}
+.rest{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--clash) 13%,transparent)}
+.hol{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--clash) 32%,transparent)}
+.hlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin:0;padding:0;list-style:none}
+.hlist li{display:flex;gap:10px;align-items:baseline;padding:7px 10px;border-radius:8px;background:color-mix(in srgb,var(--clash) 9%,var(--surface));font-size:14px}
+.hlist b{color:var(--clash);white-space:nowrap;min-width:84px}
+.hlist li.work{background:var(--sunk)}
+.hlist li.work b{color:var(--ink)}
 .bar{position:absolute;top:8px;bottom:8px;border-radius:4px;min-width:3px}
 .clash{position:absolute;top:4px;bottom:4px;border-radius:3px;border:2px solid var(--clash);background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--clash) 45%,transparent) 0 3px,transparent 3px 6px)}
 .tl-row.cov .tl-lab{color:var(--muted);font-size:12px}
@@ -140,6 +146,9 @@ table.st td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middl
 (function(){
 const MS=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
 const MN=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+/* Производственный календарь 2027: постановление Правительства РФ № 1187 от 17.09.2026 */
+const REST=[['2027-01-01','2027-01-10','Новогодние каникулы и Рождество'],['2027-02-21','2027-02-23','День защитника Отечества'],['2027-03-06','2027-03-08','Международный женский день'],['2027-05-01','2027-05-03','Праздник Весны и Труда'],['2027-05-08','2027-05-10','День Победы'],['2027-06-12','2027-06-14','День России'],['2027-11-04','2027-11-07','День народного единства'],['2027-12-31','2027-12-31','Перенесённый выходной']];
+const WORKSAT=[['2027-02-20','Рабочая суббота (выходной перенесён на 22 февраля)']];
 const HOL=['01-01','01-02','01-03','01-04','01-05','01-06','01-07','01-08','02-23','03-08','05-01','05-09','06-12','11-04'];
 const DAY=864e5;
 const pad=n=>String(n).padStart(2,'0');
@@ -242,6 +251,7 @@ function timeline(rows,opts){
   let head='',lines='',hol='';
   for(let m=0;m<12;m++){const d=(Date.UTC(y,m+1,1)-Date.UTC(y,m,1))/DAY;head+='<span style="width:'+(d/N*100)+'%">'+MN[m]+'</span>';
     if(m) lines+='<b class="ml" style="left:'+((Date.UTC(y,m,1)-y0)/DAY/N*100)+'%"></b>';}
+  REST.forEach(r=>{if(r[0].startsWith(y+'-'))hol+='<b class="rest" style="'+pos(r[0],r[1])+'" title="'+esc(r[2]+': '+fmtR(r[0],r[1]))+'"></b>'});
   HOL.forEach(h=>{const t=toD(y+'-'+h);hol+='<b class="hol" style="'+pos(fromT(t),fromT(t))+'"></b>'});
   let h='<div class="tlbox"><div class="tl"><div class="tl-row tl-head"><div class="tl-lab muted small">'+esc(opts.corner||'Сотрудник')+'</div><div class="tl-track">'+head+'</div></div>';
   rows.forEach(r=>{
@@ -310,6 +320,14 @@ function empOptions(sel){
     if(!list.length)return;h+='<optgroup label="'+esc(dirName(g))+'">'+list.map(e=>'<option value="'+esc(e.id)+'"'+(e.id===sel?' selected':'')+'>'+esc(e.name)+'</option>').join('')+'</optgroup>'});
   return h;
 }
+function holidaysCard(){
+  if(year()!==2027)return '';
+  return '<section class="card"><h2>Праздники и выходные 2027</h2><ul class="hlist">'+
+    REST.map(r=>'<li><b>'+fmtR(r[0],r[1])+'</b><span>'+esc(r[2])+'</span></li>').join('')+
+    WORKSAT.map(r=>'<li class="work"><b>'+fmtR(r[0],r[0])+'</b><span>'+esc(r[1])+'</span></li>').join('')+
+    '</ul><div class="note">Производственный календарь утверждён постановлением Правительства РФ № 1187 от 17.09.2026. В отпуск не засчитываются только сами праздники: 1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября. Перенесённые выходные (например, 22 февраля, 5 ноября, 31 декабря) входят в отпуск как обычные дни.</div></section>';
+}
+
 function viewMine(){
   const me=empById(S.me);
   let h='<section class="card"><h2>Кто заполняет</h2>';
@@ -346,7 +364,7 @@ function viewMine(){
   const sorted=others.slice().sort((x,y)=>(x.dir===me.dir?0:1)-(y.dir===me.dir?0:1));
   const rows=[{label:me.name+' (вы)',c:dirIdx(me.dir),me:true,periods:mine,clash:ov.map(x=>({s:x.s,e:x.e}))}]
     .concat(sorted.map(o=>{const ps=okPeriods(o.id);const cl=[];ps.forEach(q=>mine.forEach(p=>{const x=inter(p,q);if(x)cl.push(x)}));return {label:o.name,c:dirIdx(o.dir),periods:ps,clash:cl}}));
-  h+=timeline(rows,{corner:'Год '+year()})+'<div class="legend"><span><i style="background:var(--d1)"></i>отпуск (цвет — направление)</span><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение с вами</span><span><i style="background:color-mix(in srgb,var(--muted) 25%,transparent)"></i>праздники</span></div></section>';
+  h+=timeline(rows,{corner:'Год '+year()})+'<div class="legend"><span><i style="background:var(--d1)"></i>отпуск (цвет — направление)</span><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение с вами</span><span><i style="background:color-mix(in srgb,var(--clash) 32%,transparent)"></i>праздник (не входит в отпуск)</span><span><i style="background:color-mix(in srgb,var(--clash) 13%,transparent)"></i>нерабочие дни вокруг праздников</span></div></section>'+holidaysCard();
   return h;
 }
 
@@ -366,7 +384,7 @@ function viewTeam(){
     const rows=L.map(x=>({label:x.emp.name,c:g.c,periods:x.periods,clash:ov.filter(o=>o.a===x.emp||o.b===x.emp).map(o=>({s:o.s,e:o.e}))}));
     h+='<div class="dirblock"><div class="dirhd"><span class="dot" style="background:var(--d'+g.c+')"></span><h3>'+esc(g.name)+'</h3><span class="small muted">'+list.length+' чел. · пересечений внутри: '+ov.length+'</span></div>'+timeline(rows,{coverage:true,corner:g.name})+'</div>';
   });
-  h+='<div class="legend"><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение внутри направления</span><span><i style="background:color-mix(in srgb,var(--clash) 60%,transparent)"></i>в отпуске половина направления и больше</span></div></section>';
+  h+='<div class="legend"><span><i style="border:2px solid var(--clash);background:transparent"></i>пересечение внутри направления</span><span><i style="background:color-mix(in srgb,var(--clash) 60%,transparent)"></i>в отпуске половина направления и больше</span><span><i style="background:color-mix(in srgb,var(--clash) 32%,transparent)"></i>праздник (не входит в отпуск)</span><span><i style="background:color-mix(in srgb,var(--clash) 13%,transparent)"></i>нерабочие дни вокруг праздников</span></div></section>';
 
   const scope=emps().filter(e=>S.filter==='all'||(e.dir||'')===S.filter);
   const all=pairOverlaps(scope.map(e=>({emp:e,periods:okPeriods(e.id)})));
