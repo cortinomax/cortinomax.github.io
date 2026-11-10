@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1b2d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-title" content="Хоопонопоно">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Хоопонопоно · ежедневная практика</title>
+<style>
+:root{
+  --bg:#0f1b2d; --bg2:#16243a; --card:#1c2d47; --line:#2a3f5f;
+  --text:#e9eef6; --muted:#9fb0c8; --accent:#7cc4e8; --accent2:#a8e0c8; --warm:#f2c38b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:0 0 calc(84px + env(safe-area-inset-bottom))}
+header{padding:calc(18px + env(safe-area-inset-top)) 20px 6px}
+header h1{margin:0;font-size:22px;font-weight:600;letter-spacing:.2px}
+header p{margin:2px 0 0;color:var(--muted);font-size:14px}
+main{padding:8px 16px 20px;max-width:640px;margin:0 auto}
+section{margin-bottom:28px}
+h2{font-size:19px;font-weight:600;margin:10px 4px 12px}
+h3{font-size:16px;margin:0 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.muted{color:var(--muted);font-size:14px}
+.small{font-size:13px}
+button,.btn{font:inherit;border:0;border-radius:14px;padding:12px 16px;background:var(--line);color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
+button.primary{background:var(--accent);color:#0b1626;font-weight:600}
+button.ghost{background:transparent;border:1px solid var(--line)}
+button:active{transform:scale(.98)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1}
+textarea,input,select{width:100%;font:inherit;color:var(--text);background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+textarea{min-height:80px;resize:vertical}
+ol.phrases{margin:6px 0 0;padding-left:22px;font-size:18px}
+ol.phrases li{margin:4px 0}
+
+/* phrase card */
+#phraseCard{min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;user-select:none;cursor:pointer;background:radial-gradient(circle at 50% 40%,#25406a 0%,var(--card) 70%)}
+#phraseText{font-size:28px;font-weight:600;line-height:1.25;transition:opacity .35s}
+#phraseHint{margin-top:12px}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--accent)}
+.big{font-size:34px;font-weight:700}
+
+/* checklist */
+.check{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:24px;height:24px;flex:none;accent-color:var(--accent2)}
+.check label{flex:1}
+
+/* streak */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.cal div{aspect-ratio:1;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+.cal div.l1{background:#2f5a6e;color:var(--text)}
+.cal div.l2{background:#3e8a8a;color:#fff}
+.cal div.l3{background:var(--accent2);color:#0b1626;font-weight:600}
+.cal div.today{outline:2px solid var(--warm)}
+
+/* breath */
+#breathCircle{width:180px;height:180px;margin:10px auto;border-radius:50%;background:radial-gradient(circle,#7cc4e8 0%,#2b5a85 70%);transform:scale(.55);transition:transform 1s linear;display:flex;align-items:center;justify-content:center}
+#breathLabel{text-align:center;font-size:20px;font-weight:600}
+#breathCount{color:#0b1626;font-weight:700;font-size:30px}
+
+/* journal */
+.entry{border-top:1px solid var(--line);padding:10px 0}
+.entry:first-child{border-top:0}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bg2);color:var(--muted);margin-right:6px}
+.done{opacity:.55}
+details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:10px}
+details summary{font-weight:600;cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary:after{content:"＋";float:right;color:var(--muted)}
+details[open] summary:after{content:"－"}
+details p,details li{color:#d4ddea}
+
+/* nav (JS only) */
+nav{display:none}
+.js nav{display:flex;position:fixed;left:0;right:0;bottom:0;background:rgba(15,27,45,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav button{flex:1;background:none;padding:6px 2px;border-radius:10px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button span{font-size:21px;line-height:1}
+nav button.on{color:var(--accent)}
+.js section.tab{display:none}
+.js section.tab.on{display:block}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--accent2);color:#0b1626;padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
+.toast.show{opacity:1}
+.nojs-note{background:#2b3550;border-radius:12px;padding:10px 14px;font-size:14px;color:var(--muted);margin:8px 0 16px}
+.js .nojs-note{display:none}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<header>
+  <h1>Хоопонопоно</h1>
+  <p id="today">Очищение — каждый день</p>
+</header>
+
+<main>
+<div class="nojs-note">Интерактивные функции (счётчик, дыхание, дневник) отключены в этом режиме просмотра. Ниже — фразы и вся практика в текстовом виде.</div>
+
+<!-- ========== СЕГОДНЯ ========== -->
+<section class="tab on" id="t-today">
+  <h2>Сегодня</h2>
+
+  <div class="card">
+    <h3>Четыре фразы</h3>
+    <ol class="phrases">
+      <li>Мне очень жаль.</li>
+      <li>Пожалуйста, прости меня.</li>
+      <li>Спасибо тебе.</li>
+      <li>Я люблю тебя.</li>
+    </ol>
+    <p class="muted small" style="margin:8px 0 0">Обращение — к Божественному / Источнику внутри себя, а не к другому человеку. Порядок не важен, важна искренность и регулярность. Если времени нет — достаточно «Я люблю тебя».</p>
+  </div>
+
+  <div class="card">
+    <h3>Ритуал дня</h3>
+    <div id="checklist">
+      <div class="check"><input type="checkbox" id="c-morning" data-k="morning"><label for="c-morning"><b>Утро.</b> Намерение: «Сегодня я беру 100% ответственность за всё, что появляется в моей жизни». 3 круга фраз.</label></div>
+      <div class="check"><input type="checkbox" id="c-breath" data-k="breath"><label for="c-breath"><b>Дыхание ХА.</b> 9 кругов (вдох 7 — пауза 7 — выдох 7 — пауза 7).</label></div>
+      <div class="check"><input type="checkbox" id="c-moment" data-k="moment"><label for="c-moment"><b>В моменте.</b> Почувствовал раздражение, страх, оценку — очистил прямо там, хотя бы мысленно.</label></div>
+      <div class="check"><input type="checkbox" id="c-person" data-k="person"><label for="c-person"><b>Человек или ситуация.</b> Очистил то, что сегодня «цепляет» (записать в дневник).</label></div>
+      <div class="check"><input type="checkbox" id="c-evening" data-k="evening"><label for="c-evening"><b>Вечер.</b> Пересмотр дня: что всплыло — то очищаю. Благодарность за день.</label></div>
+    </div>
+  </div>
+
+  <div class="card" id="statsCard" hidden>
+    <div class="row">
+      <div class="grow"><div class="muted small">Серия дней</div><div class="big" id="streak">0</div></div>
+      <div class="grow"><div class="muted small">Кругов сегодня</div><div class="big" id="cyclesToday">0</div></div>
+      <div class="grow"><div class="muted small">Всего кругов</div><div class="big" id="cyclesTotal">0</div></div>
+    </div>
+    <div class="cal" id="cal"></div>
+    <p class="muted small" style="margin:8px 0 0">Последние 28 дней. Цвет ярче — больше практики.</p>
+  </div>
+
+  <div class="card" id="thoughtCard" hidden>
+    <div class="muted small">Мысль дня</div>
+    <div id="thought" style="font-size:18px;margin-top:4px"></div>
+  </div>
+</section>
+
+<!-- ========== ОЧИЩЕНИЕ ========== -->
+<section class="tab" id="t-clean">
+  <h2>Очищение</h2>
+  <div class="card">
+    <label class="muted small" for="target">Что очищаю сейчас (необязательно)</label>
+    <input id="target" placeholder="напр.: тревога из-за совещания, отношение к N…">
+  </div>
+  <div class="card" id="phraseCard" role="button" aria-label="Следующая фраза">
+    <div id="phraseText">Нажмите, чтобы начать</div>
+    <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+    <div id="phraseHint" class="muted small">Касание — следующая фраза. Произносите про себя или вслух.</div>
+  </div>
+  <div class="row" style="margin-bottom:12px">
+    <div class="card grow" style="margin:0;text-align:center"><div class="muted small">Кругов в сессии</div><div class="big" id="sessCycles">0</div></div>
+    <div class="card grow" style="margin:0;text-align:center"><div class="muted small">Сегодня</div><div class="big" id="sessToday">0</div></div>
+  </div>
+  <div class="row">
+    <button class="ghost grow" id="autoBtn">▶ Автоповтор</button>
+    <button class="primary grow" id="finishBtn">Завершить и записать</button>
+  </div>
+  <p class="muted small">Автоповтор сменяет фразы каждые 4 секунды. Если появляются мысли «а это работает?» — это тоже память, её тоже можно очищать.</p>
+</section>
+
+<!-- ========== ДЫХАНИЕ ========== -->
+<section class="tab" id="t-breath">
+  <h2>Дыхание ХА</h2>
+  <div class="card">
+    <div id="breathCircle"><div id="breathCount">7</div></div>
+    <div id="breathLabel">Готовы?</div>
+    <p class="muted small" style="text-align:center;margin:6px 0 12px">Круг <span id="breathRound">0</span> из <span id="breathTotal">9</span></p>
+    <div class="row">
+      <select id="breathRounds" class="grow" style="width:auto">
+        <option value="3">3 круга</option>
+        <option value="7">7 кругов</option>
+        <option value="9" selected>9 кругов</option>
+      </select>
+      <select id="breathSec" class="grow" style="width:auto">
+        <option value="4">по 4 счёта</option>
+        <option value="5">по 5 счётов</option>
+        <option value="7" selected>по 7 счётов</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="primary grow" id="breathBtn">Начать</button>
+    </div>
+  </div>
+  <div class="card">
+    <p style="margin:0">Сядьте с прямой спиной, стопы на полу. Вдох через нос на 7 счётов, задержка на 7, выдох на 7, задержка на 7 — это один круг. Если 7 тяжело — начните с 4. На выдохе можно мысленно говорить «Я люблю тебя».</p>
+  </div>
+</section>
+
+<!-- ========== ДНЕВНИК ========== -->
+<section class="tab" id="t-journal">
+  <h2>Дневник очищения</h2>
+  <div class="card">
+    <label class="muted small" for="jText">Что всплыло? (человек, ситуация, чувство, мысль)</label>
+    <textarea id="jText" placeholder="Опишите коротко — без оценок. Это просто память, которая проигрывается."></textarea>
+    <div class="row" style="margin-top:8px">
+      <select id="jKind" class="grow" style="width:auto">
+        <option>Чувство</option><option>Человек</option><option>Работа</option><option>Деньги</option><option>Здоровье</option><option>Семья</option><option>Другое</option>
+      </select>
+      <button class="primary" id="jAdd">Добавить</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row"><h3 class="grow" style="margin:0">Записи</h3>
+      <select id="jFilter" style="width:auto"><option value="open">В работе</option><option value="all">Все</option><option value="done">Отпущено</option></select>
+    </div>
+    <div id="jList" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- ========== ПРИНЦИПЫ ========== -->
+<section class="tab" id="t-learn">
+  <h2>Суть метода</h2>
+  <details open><summary>100% ответственность</summary>
+    <p>Всё, что появляется в моём опыте — люди, события, проблемы — проходит через меня. Не «я виноват», а «это во мне, значит, я могу это очистить». Работа идёт не с другим человеком, а с тем, что во мне на него откликается.</p></details>
+  <details><summary>Память и вдохновение</summary>
+    <p>Решения приходят либо из памяти (старые программы, страхи, привычные реакции), либо из вдохновения. Очищение стирает память, чтобы освободить место вдохновению. Мы не знаем, что именно стирается — и это не обязательно знать.</p></details>
+  <details><summary>Нулевое состояние</summary>
+    <p>Цель — не получить конкретный результат, а вернуться в «ноль»: состояние без ограничений и без программ. Из него действие становится точным. Отпускайте ожидания того, как и когда «должно сработать».</p></details>
+  <details><summary>Очищение — постоянный процесс</summary>
+    <p>Это не разовая техника, а фон жизни. Памяти много, поэтому очищать можно всё время: в очереди, на совещании, перед звонком, читая почту. Короткие циклы в течение дня важнее одной длинной сессии.</p></details>
+  <details><summary>Что значит каждая фраза</summary>
+    <ul>
+      <li><b>Мне очень жаль</b> — признание: во мне есть что-то, что создало эту ситуацию.</li>
+      <li><b>Пожалуйста, прости меня</b> — просьба об освобождении, без самобичевания.</li>
+      <li><b>Спасибо тебе</b> — благодарность за очищение, доверие процессу.</li>
+      <li><b>Я люблю тебя</b> — самая сильная фраза, возвращает к Источнику.</li>
+    </ul></details>
+  <details><summary>Применение на работе</summary>
+    <ul>
+      <li>Перед сложной встречей — 2–3 минуты очищения ситуации и участников.</li>
+      <li>Получили неприятное письмо — сначала «спасибо, я люблю тебя» себе, потом ответ.</li>
+      <li>Готовите материал — очистите задачу и тех, кто его будет читать.</li>
+      <li>Конфликт в команде — очищайте не человека, а свою реакцию на него.</li>
+    </ul></details>
+  <details><summary>Дополнительные инструменты</summary>
+    <p>В традиции доктора Хью Лина есть и другие «инструменты очищения», которые можно добавлять по вдохновению: дыхание ХА, мысленное «ластик»-касание к проблеме, вода «синее солнце» (вода, постоявшая на солнце в синей стеклянной бутылке), простое «Спасибо» в ответ на любую мысль. Используйте то, что откликается.</p></details>
+  <details><summary>Если «не получается»</summary>
+    <p>Сомнение, скука, раздражение на практику — тоже память. Её очищают теми же фразами. Делать механически — нормально: регулярность важнее ощущений.</p></details>
+</section>
+
+<!-- ========== НАСТРОЙКИ ========== -->
+<section class="tab" id="t-set">
+  <h2>Настройки</h2>
+  <div class="card">
+    <h3>Напоминания</h3>
+    <p class="muted small" style="margin-top:0">Надёжные офлайн-напоминания — через календарь телефона: импортируйте файл <b>hooponopono-reminders.ics</b> (уведомления от самого приложения iPhone без сервера не поддерживает) (утро, обед, вечер). Пока это окно открыто, приложение тоже мягко напомнит в выбранные часы.</p>
+    <label class="muted small" for="remTimes">Время (через запятую)</label>
+    <input id="remTimes" value="08:00, 13:00, 21:30">
+    <div class="row" style="margin-top:8px"><button class="ghost grow" id="saveRem">Сохранить</button></div>
+  </div>
+  <div class="card">
+    <h3>Резервная копия</h3>
+    <p class="muted small" style="margin-top:0">Данные хранятся только на этом устройстве, в этом браузере. Периодически делайте копию.</p>
+    <div class="row">
+      <button class="ghost grow" id="exportBtn">Сохранить копию</button>
+      <label class="btn grow" style="text-align:center;border:1px solid var(--line)">Восстановить<input type="file" id="importFile" accept=".json,application/json" hidden></label>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Сброс</h3>
+    <button class="ghost" id="resetBtn">Очистить все данные</button>
+  </div>
+  <p class="muted small">По мотивам метода Хоопонопоно в изложении Джо Витале и доктора Ихалеакала Хью Лина. Тексты — краткий пересказ, не цитаты из книг.</p>
+</section>
+</main>
+
+<nav id="nav">
+  <button data-t="t-today" class="on"><span>☀︎</span>Сегодня</button>
+  <button data-t="t-clean"><span>♡</span>Очищение</button>
+  <button data-t="t-breath"><span>◎</span>Дыхание</button>
+  <button data-t="t-journal"><span>✎</span>Дневник</button>
+  <button data-t="t-learn"><span>❖</span>Суть</button>
+  <button data-t="t-set"><span>⚙︎</span></button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='hoopo_v1';
+var mem={};
+function load(){try{var s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return mem.d||null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){mem.d=D}}
+var D=load()||{days:{},journal:[],total:0,rem:'08:00, 13:00, 21:30'};
+D.days=D.days||{};D.journal=D.journal||[];D.total=D.total||0;
+
+function $(id){return document.getElementById(id)}
+function pad(n){return (n<10?'0':'')+n}
+function dkey(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function day(k){k=k||dkey();if(!D.days[k])D.days[k]={c:0,chk:{}};return D.days[k]}
+function toast(t){var el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},1800)}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* date header */
+var months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var wd=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+var now=new Date();
+$('today').textContent=wd[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()];
+
+/* nav */
+var navBtns=document.querySelectorAll('nav button');
+function show(id){
+  document.querySelectorAll('section.tab').forEach(function(s){s.classList.toggle('on',s.id===id)});
+  navBtns.forEach(function(b){b.classList.toggle('on',b.dataset.t===id)});
+  window.scrollTo(0,0);
+  if(id==='t-today')renderToday();
+  if(id==='t-journal')renderJournal();
+}
+navBtns.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.t)})});
+
+/* thoughts (own wording) */
+var thoughts=[
+ 'Всё, что я вижу в другом, — во мне. И это можно очистить.',
+ 'Не нужно понимать, что именно стирается. Достаточно очищать.',
+ 'Сначала очищение, потом действие.',
+ 'Проблема — не враг, а возможность освободить память.',
+ 'Отпусти ожидание результата — и оставь место вдохновению.',
+ '«Я люблю тебя» — уже достаточно.',
+ 'Очищай не человека, а то, что во мне на него откликается.',
+ 'Ноль — это не пустота, а свобода от старых программ.',
+ 'Благодари даже за то, что раздражает: это показывает, что очищать.',
+ 'Мир меняется, когда меняется то, что во мне.',
+ 'Сомнение — тоже память. Спасибо, я люблю тебя.',
+ 'Каждый момент — новая возможность вернуться к нулю.'
+];
+
+/* today */
+function streak(){
+  var n=0,d=new Date();
+  if(!active(dkey(d)))d.setDate(d.getDate()-1);
+  while(active(dkey(d))){n++;d.setDate(d.getDate()-1)}
+  return n;
+}
+function active(k){var x=D.days[k];if(!x)return false;if(x.c>0)return true;for(var i in x.chk)if(x.chk[i])return true;return false}
+function level(k){var x=D.days[k];if(!x)return 0;var s=x.c;for(var i in x.chk)if(x.chk[i])s+=2;return s===0?0:s<5?1:s<12?2:3}
+function renderToday(){
+  var t=day();
+  document.querySelectorAll('#checklist input').forEach(function(cb){cb.checked=!!t.chk[cb.dataset.k]});
+  $('statsCard').hidden=false;$('thoughtCard').hidden=false;
+  $('streak').textContent=streak();
+  $('cyclesToday').textContent=t.c;
+  $('cyclesTotal').textContent=D.total;
+  var start=new Date();start.setDate(start.getDate()-27);
+  var html='';
+  for(var i=0;i<28;i++){var d=new Date(start);d.setDate(start.getDate()+i);var k=dkey(d);
+    html+='<div class="l'+level(k)+(k===dkey()?' today':'')+'">'+d.getDate()+'</div>'}
+  $('cal').innerHTML=html;
+  var idx=Math.floor((new Date()-new Date(2026,0,1))/864e5)%thoughts.length;
+  $('thought').textContent=thoughts[(idx+thoughts.length)%thoughts.length];
+}
+document.querySelectorAll('#checklist input').forEach(function(cb){
+  cb.addEventListener('change',function(){day().chk[cb.dataset.k]=cb.checked;save();renderToday();if(cb.checked){buzz(20);toast('Спасибо ♡')}});
+});
+
+/* cleaning */
+var P=['Мне очень жаль','Пожалуйста, прости меня','Спасибо тебе','Я люблю тебя'];
+var pi=-1,sess=0,auto=null;
+var dots=$('dots').children;
+function step(){
+  pi=(pi+1)%4;
+  var el=$('phraseText');el.style.opacity=0;
+  setTimeout(function(){el.textContent=P[pi];el.style.opacity=1},150);
+  for(var i=0;i<4;i++)dots[i].classList.toggle('on',i<=pi);
+  if(pi===3){sess++;var t=day();t.c++;D.total++;save();$('sessCycles').textContent=sess;$('sessToday').textContent=t.c;buzz([30,60,30])}
+  else buzz(10);
+  $('phraseHint').textContent='';
+}
+$('phraseCard').addEventListener('click',function(){if(auto)return;step()});
+$('autoBtn').addEventListener('click',function(){
+  if(auto){clearInterval(auto);auto=null;this.textContent='▶ Автоповтор';return}
+  step();auto=setInterval(step,4000);this.textContent='❚❚ Пауза';
+});
+$('finishBtn').addEventListener('click',function(){
+  if(auto){clearInterval(auto);auto=null;$('autoBtn').textContent='▶ Автоповтор'}
+  var tg=$('target').value.trim();
+  if(tg){
+    var ex=D.journal.find(function(j){return !j.done&&j.text===tg});
+    if(ex){ex.n=(ex.n||0)+sess;ex.last=Date.now()}
+    else D.journal.unshift({id:Date.now(),date:dkey(),text:tg,kind:'Сессия',n:sess,done:false,last:Date.now()});
+  }
+  save();toast(sess?('Очищено кругов: '+sess):'Спасибо');
+  sess=0;pi=-1;$('sessCycles').textContent=0;$('target').value='';
+  $('phraseText').textContent='Нажмите, чтобы начать';for(var i=0;i<4;i++)dots[i].classList.remove('on');
+});
+$('sessToday').textContent=day().c;
+
+/* breath */
+var bTimer=null;
+$('breathBtn').addEventListener('click',function(){
+  var btn=this;
+  if(bTimer){clearInterval(bTimer);bTimer=null;btn.textContent='Начать';$('breathLabel').textContent='Остановлено';setCircle(.55);return}
+  var rounds=+$('breathRounds').value,sec=+$('breathSec').value;
+  $('breathTotal').textContent=rounds;
+  var phases=[['Вдох',1],['Задержка',1],['Выдох',.55],['Задержка',.55]];
+  var r=1,ph=0,c=sec;
+  btn.textContent='Стоп';
+  function paint(){$('breathRound').textContent=r;$('breathLabel').textContent=phases[ph][0];$('breathCount').textContent=c}
+  $('breathCircle').style.transitionDuration=sec+'s';
+  setCircle(phases[0][1]);paint();
+  bTimer=setInterval(function(){
+    c--;
+    if(c<=0){
+      ph++;
+      if(ph>3){ph=0;r++;
+        if(r>rounds){clearInterval(bTimer);bTimer=null;btn.textContent='Начать';$('breathLabel').textContent='Готово. Спасибо ♡';$('breathCount').textContent='✓';
+          var t=day();t.chk.breath=true;save();buzz([40,80,40]);return}
+      }
+      c=sec;setCircle(phases[ph][1]);buzz(15);
+    }
+    paint();
+  },1000);
+});
+function setCircle(s){$('breathCircle').style.transform='scale('+s+')'}
+
+/* journal */
+$('jAdd').addEventListener('click',function(){
+  var t=$('jText').value.trim();if(!t){toast('Напишите, что всплыло');return}
+  D.journal.unshift({id:Date.now(),date:dkey(),text:t,kind:$('jKind').value,n:0,done:false});
+  day().chk.person=true;save();$('jText').value='';renderJournal();toast('Записано');
+});
+$('jFilter').addEventListener('change',renderJournal);
+function renderJournal(){
+  var f=$('jFilter').value;
+  var list=D.journal.filter(function(j){return f==='all'||(f==='open'?!j.done:j.done)});
+  if(!list.length){$('jList').innerHTML='<p class="muted small">Пока пусто.</p>';return}
+  $('jList').innerHTML=list.map(function(j){
+    return '<div class="entry'+(j.done?' done':'')+'" data-id="'+j.id+'">'+
+      '<div><span class="tag">'+esc(j.kind)+'</span><span class="muted small">'+esc(j.date)+' · очищено кругов: '+(j.n||0)+'</span></div>'+
+      '<div style="margin:4px 0 8px">'+esc(j.text)+'</div>'+
+      '<div class="row"><button class="primary" data-a="clean">Очистить</button>'+
+      '<button class="ghost" data-a="plus">+1 круг</button>'+
+      '<button class="ghost" data-a="done">'+(j.done?'Вернуть':'Отпускаю')+'</button>'+
+      '<button class="ghost" data-a="del">✕</button></div></div>';
+  }).join('');
+}
+$('jList').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var id=+b.closest('.entry').dataset.id;var j=D.journal.find(function(x){return x.id===id});if(!j)return;
+  var a=b.dataset.a;
+  if(a==='clean'){$('target').value=j.text;show('t-clean');return}
+  if(a==='plus'){j.n=(j.n||0)+1;day().c++;D.total++;buzz(20)}
+  if(a==='done'){j.done=!j.done;if(j.done)toast('Отпущено. Спасибо ♡')}
+  if(a==='del'){if(!confirm('Удалить запись?'))return;D.journal=D.journal.filter(function(x){return x.id!==id})}
+  save();renderJournal();
+});
+
+/* reminders while open */
+$('remTimes').value=D.rem;
+$('saveRem').addEventListener('click',function(){D.rem=$('remTimes').value;save();toast('Сохранено')});
+var lastRem='';
+setInterval(function(){
+  var n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());
+  var list=(D.rem||'').split(',').map(function(s){return s.trim()});
+  if(list.indexOf(hm)>=0&&lastRem!==hm){lastRem=hm;buzz([200,100,200]);toast('Время очищения ♡');}
+},20000);
+
+/* backup */
+$('exportBtn').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify(D,null,1)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hooponopono-backup-'+dkey()+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+});
+$('importFile').addEventListener('change',function(e){
+  var f=e.target.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.days)throw 0;D=x;save();renderToday();toast('Восстановлено')}catch(err){toast('Неверный файл')}};
+  r.readAsText(f);
+});
+$('resetBtn').addEventListener('click',function(){
+  if(!confirm('Удалить все данные практики на этом устройстве?'))return;
+  D={days:{},journal:[],total:0,rem:D.rem};save();renderToday();renderJournal();toast('Данные очищены');
+});
+
+renderToday();
+})();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</body>
+</html>
