@@ -819,6 +819,7 @@ async function savePlan(){
   if(!S.me||S.saving)return;
   const a=analyze(S.draft);
   if(a.rows.some(p=>p.err)){S.msg='Исправьте периоды, отмеченные красным';S.msgKind='err';render();return}
+  if(!a.has14){S.msg='Нельзя сохранить: одна из частей отпуска должна быть не менее 14 дней. Измените даты.';S.msgKind='err';render();return}
   const periods=a.ok.map(p=>({s:p.s,e:p.e,days:p.days})).sort((x,y)=>x.s<y.s?-1:1);
   S.saving=true;render();
   try{
